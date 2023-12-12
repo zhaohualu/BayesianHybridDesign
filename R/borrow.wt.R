@@ -19,12 +19,12 @@
 #'  }
 #' @examples
 #' 
-#' borrow.wt(Yc=40*0.312, nc=40, Ych=234*0.312, nch=234, nche=40, a0c=0.001, b0c=0.001, delta_threshold=0.1)
+#' borrow.wt(Yc=12, nc=40, Ych=70, nch=200, nche=40, a0c=0.001, b0c=0.001, delta_threshold=0.1)
 #' 
 #' @export
 #' 
-borrow.wt = function (Yc=40*0.312, nc=40,
-                      Ych=234*0.312, nch=234, nche=40, 
+borrow.wt = function (Yc=12, nc=40,
+                      Ych=70, nch=200, nche=40, 
                       a0c=0.001, b0c=0.001,
                       delta_threshold=0.1){
 
