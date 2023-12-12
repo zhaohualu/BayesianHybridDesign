@@ -1,0 +1,12 @@
+Package: BayesianHybridDesign
+Title: Bayesian Hybrid Design and Analysis
+Version: 0.1
+Authors@R: 
+    person("Philip", "He", , "phe@dsi.com", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: This package performs the Bayesian hybrid design and analysis using dynamic power prior method. The design is applicable for primary endpoint of ORR with a historical control of the same patient population as the current trial. The historical control and the study control are incorported together to create the hybrid control.
+License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
+    license
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.3
