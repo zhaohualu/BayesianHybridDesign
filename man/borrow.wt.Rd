@@ -12,7 +12,8 @@ borrow.wt(
   nche = 40,
   a0c = 0.001,
   b0c = 0.001,
-  delta_threshold = 0.1
+  delta_threshold = 0.1,
+  method = "Empirical Bayes"
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ borrow.wt(
 \item{b0c}{hyperprior for control response rate beta(a0c, b0c)}
 
 \item{delta_threshold}{Borrow when abs(pc (current study) - pch) <= delta_threshold}
+
+\item{method}{Method for dynamic borrowing, "Empirical Bayes" or "Heterogeneity".}
 }
 \value{
 An object with values

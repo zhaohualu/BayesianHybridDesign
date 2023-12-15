@@ -18,6 +18,7 @@ Bayesian.Hybrid.Design(
   a0t = 0.001,
   b0t = 0.001,
   delta_threshold = 0.1,
+  method = "Empirical Bayes",
   nsim = 10000,
   seed = 2000
 )
@@ -27,27 +28,29 @@ Bayesian.Hybrid.Design(
 
 \item{nt}{number of patients in experimental arm in current study}
 
-\item{pc}{response rate for control arm in current study}
+\item{pc}{Response rate for control arm in current study}
 
 \item{nc}{number of patients in control arm in current study}
 
-\item{pch}{response rate for control treatment in historical study}
+\item{pch}{Response rate for control treatment in historical study}
 
 \item{nche}{Equivalent number of patients borrowed from historical study}
 
 \item{nch}{Total number of patients in historical control}
 
-\item{sig}{significance boundary defined as P(pt_hat > pc_hat|hybrid) > sig}
+\item{sig}{Significance boundary defined as P(pt_hat > pc_hat|hybrid) > sig}
 
-\item{a0c}{hyperprior for control response rate beta(a0c, b0c)}
+\item{a0c}{Hyperprior for control response rate beta(a0c, b0c)}
 
-\item{b0c}{hyperprior for control response rate beta(a0c, b0c)}
+\item{b0c}{Hyperprior for control response rate beta(a0c, b0c)}
 
-\item{a0t}{hyperprior for experimental response rate beta(a0t, b0t)}
+\item{a0t}{Hyperprior for experimental response rate beta(a0t, b0t)}
 
-\item{b0t}{hyperprior for experimental response rate beta(a0t, b0t)}
+\item{b0t}{Hyperprior for experimental response rate beta(a0t, b0t)}
 
 \item{delta_threshold}{Borrow when abs(pc_hat (current study) - pch) <= delta_threshold}
+
+\item{method}{Method for dynamic borrowing, "Empirical Bayes" or "Heterogeneity".}
 
 \item{nsim}{Number of replications to calculate power}
 
