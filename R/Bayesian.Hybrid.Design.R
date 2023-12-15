@@ -7,14 +7,15 @@
 #' @param nc number of patients in control arm in current study  
 #' @param nche Equivalent number of patients borrowed from historical study
 #' @param nch Total number of patients in historical control
-#' @param pc response rate for control arm in current study
-#' @param pch response rate for control treatment in historical study
-#' @param sig significance boundary defined as P(pt_hat > pc_hat|hybrid) > sig
-#' @param a0c hyperprior for control response rate beta(a0c, b0c)
-#' @param b0c hyperprior for control response rate beta(a0c, b0c)
-#' @param a0t hyperprior for experimental response rate beta(a0t, b0t)
-#' @param b0t hyperprior for experimental response rate beta(a0t, b0t)
+#' @param pc Response rate for control arm in current study
+#' @param pch Response rate for control treatment in historical study
+#' @param sig Significance boundary defined as P(pt_hat > pc_hat|hybrid) > sig
+#' @param a0c Hyperprior for control response rate beta(a0c, b0c)
+#' @param b0c Hyperprior for control response rate beta(a0c, b0c)
+#' @param a0t Hyperprior for experimental response rate beta(a0t, b0t)
+#' @param b0t Hyperprior for experimental response rate beta(a0t, b0t)
 #' @param delta_threshold Borrow when abs(pc_hat (current study) - pch) <= delta_threshold 
+#' @param method Method for dynamic borrowing, "Empirical Bayes" or "Heterogeneity".
 #' @param nsim Number of replications to calculate power
 #' @param seed=2000 seed for simulations
 #'  
@@ -34,12 +35,12 @@
 Bayesian.Hybrid.Design = function(pt=0.512, nt=40,pc=0.312,nc=40,pch=0.312,
                                   nche=40,nch=234, sig=0.90,
                                   a0c=0.001,b0c=0.001,a0t=0.001,b0t=0.001,
-                                  delta_threshold=0.1,
+                                  delta_threshold=0.1, method="Empirical Bayes",
                                   nsim = 10000, seed=2000){
   
   #Dynamic borrowing parameter
   wt = borrow.wt(Yc=nc*pc, nc=nc, Ych=nch*pch, nch=nch, nche=nche, 
-                 a0c=a0c, b0c=b0c, delta_threshold=delta_threshold)
+                 a0c=a0c, b0c=b0c, delta_threshold=delta_threshold, method=method)
   w = wt$w
   
   #All scenarios for number of responders in exp arm
@@ -93,7 +94,7 @@ Bayesian.Hybrid.Design = function(pt=0.512, nt=40,pc=0.312,nc=40,pch=0.312,
     
     #Dynamic borrowing parameter
     wt = borrow.wt(Yc=Yc.s, nc=nc, Ych=nch*pch, nch=nch, nche=nche,  
-                   a0c=a0c, b0c=b0c, delta_threshold=delta_threshold)
+                   a0c=a0c, b0c=b0c, delta_threshold=delta_threshold, method=method)
     w = wt$w
     
     #Posterior distributions

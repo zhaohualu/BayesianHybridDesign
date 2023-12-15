@@ -10,7 +10,8 @@
 #' @param a0c hyperprior for control response rate beta(a0c, b0c)
 #' @param b0c hyperprior for control response rate beta(a0c, b0c)
 #' @param delta_threshold Borrow when abs(pc (current study) - pch) <= delta_threshold
-#'  
+#' @param method Method for dynamic borrowing, "Empirical Bayes" or "Heterogeneity".
+#'   
 #' @return An object with values
 #'  \itemize{
 #'  \item a Global borrowing weight
@@ -19,15 +20,18 @@
 #'  }
 #' @examples
 #' 
-#' borrow.wt(Yc=12, nc=40, Ych=70, nch=200, nche=40, a0c=0.001, b0c=0.001, delta_threshold=0.1)
+#' borrow.wt(Yc=40*0.312, nc=40, Ych=234*0.312, nch=234, nche=40, a0c=0.001, b0c=0.001, delta_threshold=0.1)
 #' 
 #' @export
 #' 
-borrow.wt = function (Yc=12, nc=40,
-                      Ych=70, nch=200, nche=40, 
+borrow.wt = function (Yc=40*0.312, nc=40,
+                      Ych=234*0.312, nch=234, nche=40, 
                       a0c=0.001, b0c=0.001,
-                      delta_threshold=0.1){
+                      delta_threshold=0.1, method="Empirical Bayes"){
 
+  #Global weight parameter for borrowing    
+  a = nche/nch
+  
   #Target function to optimize weight
   logwfunction = function(w,a0,b0,Y,n,Y0,n0){
     #a0, b0: beta hyper prior parameters beta(a0, b0)
@@ -38,18 +42,35 @@ borrow.wt = function (Yc=12, nc=40,
       lbeta(a0  + w*Y0, b0 + w*(n0-Y0))
   }
   
-  #Empirical weight
-  we = optimize(logwfunction, c(0,1),
-                a0 = a0c,
-                b0 = b0c,
-                Y = Yc,
-                n = nc, 
-                Y0 = Ych,
-                n0 = nch,
-                maximum = TRUE)$maximum
-  
-  #Global weight parameter for borrowing    
-  a = nche/nch
+  if (method =="Empirical Bayes") {
+    #Empirical weight
+    we = optimize(logwfunction, c(0,1),
+                  a0 = a0c,
+                  b0 = b0c,
+                  Y = Yc,
+                  n = nc, 
+                  Y0 = Ych,
+                  n0 = nch,
+                  maximum = TRUE)$maximum
+  } else if (method == "Heterogeneity") {
+    #Heterogeneity
+    
+    #P(p_c > p_ch)
+    P_c_p_ch = function(y,ac,bc,ach,bch){
+      pbeta(y,ac,bc,lower.tail=F)*dbeta(y,ach,bch)
+    }
+    #P(p_ch > p_c)
+    P_ch_p_c = function(y,ac,bc,ach,bch){
+      pbeta(y,ach,bch,lower.tail=F)*dbeta(y,ac,bc)
+    }
+    xi1 = integrate(P_c_p_ch, lower=0.0001, upper=0.9999,
+                    ac = a0c + Yc, bc = b0c + (nc - Yc),
+                    ach = a0c + a*Ych, bch=b0c + a*(nch - Ych))$value
+    xi2 = integrate(P_ch_p_c, lower=0.0001, upper=0.9999,
+                    ac = a0c + Yc, bc = b0c + (nc - Yc),
+                    ach = a0c + a*Ych, bch=b0c + a*(nch - Ych))$value
+    we = 2*min(xi1, xi2)
+  }
   
   #Overall weight
   w = we * a * (abs(Yc/nc - Ych/nch) < delta_threshold)
