@@ -1,7 +1,7 @@
 #' Borrowing weights from historical study
-#' 
+#'
 #' This function calculates the borrowing weights for the hybrid control from historical study
-#' 
+#'
 #' @param Yc number of responders for control arm in current study
 #' @param nc number of patients in control arm in current study
 #' @param Ych number of responders for control treatment in historical study
@@ -11,55 +11,56 @@
 #' @param b0c hyperprior for control response rate beta(a0c, b0c)
 #' @param delta_threshold Borrow when abs(pc (current study) - pch) <= delta_threshold
 #' @param method Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", Density Product".
-#'   
+#' @param theta A parameter with a range of (0, 1), and only applicable to method = "Density Product", where the weight is defined as E_c((fch/fc)^theta).
+#'
 #' @return An object with values
 #'  \itemize{
 #'  \item a Global borrowing weight
-#'  \item we Dynamic borrowingweight according to similarly of response rate
+#'  \item wd Dynamic borrowingweight according to similarly of response rate
 #'  \item w Overall borrowing weight
 #'  }
 #' @examples
-#' 
+#'
 #' borrow.wt(Yc=40*0.312, nc=40, Ych=234*0.312, nch=234, nche=40, a0c=0.001, b0c=0.001, delta_threshold=0.1)
-#' 
+#'
 #' @export
-#' 
+#'
 borrow.wt = function (Yc=40*0.312, nc=40,
-                      Ych=234*0.312, nch=234, nche=40, 
+                      Ych=234*0.312, nch=234, nche=40,
                       a0c=0.001, b0c=0.001,
-                      delta_threshold=0.1, method="Empirical Bayes"){
+                      delta_threshold=0.1, method="Empirical Bayes", theta=0.5){
 
-  #Global weight parameter for borrowing    
+  #Global weight parameter for borrowing
   a = nche/nch
-  
+
   #Target function to optimize weight
   logwfunction = function(w,a0,b0,Y,n,Y0,n0){
     #a0, b0: beta hyper prior parameters beta(a0, b0)
     #Y, n: current study number of responders and size in control
     #Y0, n0: historical control for number of responders and size
-    
-    lbeta(a0 + Y + w*Y0, b0 + (n-Y) + w*(n0-Y0)) - 
+
+    lbeta(a0 + Y + w*Y0, b0 + (n-Y) + w*(n0-Y0)) -
       lbeta(a0  + w*Y0, b0 + w*(n0-Y0))
   }
-  
+
   ac = a0c + Yc
   bc = b0c + (nc - Yc)
   ach = a0c + a*Ych
   bch = b0c + a*(nch - Ych)
-  
+
   if (method =="Empirical Bayes") {
     #Empirical weight
     wd = optimize(logwfunction, c(0,1),
                   a0 = a0c,
                   b0 = b0c,
                   Y = Yc,
-                  n = nc, 
+                  n = nc,
                   Y0 = Ych,
                   n0 = nch,
                   maximum = TRUE)$maximum
   } else if (method == "Bayesian p") {
     #Heterogeneity
-    
+
     #P(p_c > p_ch)
     P_c_p_ch = function(y,ac,bc,ach,bch){
       pbeta(y,ac,bc,lower.tail=F)*dbeta(y,ach,bch)
@@ -76,14 +77,31 @@ borrow.wt = function (Yc=40*0.312, nc=40,
   } else if (method == "Density Product") {
     # \int_0^1 \sqrt{f_1(x)f_2(x)}dx
     f.den = function(y){
-      sqrt(dbeta(y,ac,bc)*dbeta(y,ach,bch))
+      L = theta*log(dbeta(y,ach,bch))+(1-theta)*log(dbeta(y,ac,bc))
+      return(exp(L))
     }
     wd = integrate(f.den, lower=0, upper=1)$value
+  } else if (method == "Density Product 2") {
+    # \int_0^1 \sqrt{f_1(x)f_2(x)}dx
+    f.den = function(y){
+      (dbeta(y,ac,bc)*dbeta(y,ach,bch))
+    }
+    fc.den = function(y){
+      (dbeta(y,ac,bc)^2)
+    }
+    fch.den = function(y){
+      (dbeta(y,ach,bch)^2)
+    }
+    wd = integrate(f.den, lower=0.0001, upper=0.9999)$value/
+      sqrt(integrate(fc.den, lower=0.0001, upper=0.9999)$value * integrate(fch.den, lower=0.0001, upper=0.9999)$value)
+
+  } else{
+    stop("method not supported!")
   }
-  
+
   #Overall weight
   w = wd * a * (abs(Yc/nc - Ych/nch) < delta_threshold)
-  
+
   return(list(a=a, wd=wd, w=w))
 }
 
