@@ -13,7 +13,8 @@ borrow.wt(
   a0c = 0.001,
   b0c = 0.001,
   delta_threshold = 0.1,
-  method = "Empirical Bayes"
+  method = "Empirical Bayes",
+  theta = 0.5
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ borrow.wt(
 \item{delta_threshold}{Borrow when abs(pc (current study) - pch) <= delta_threshold}
 
 \item{method}{Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", Density Product".}
+
+\item{theta}{A parameter with a range of (0, 1), and only applicable to method = "Density Product", where the weight is defined as E_c((fch/fc)^theta).}
 }
 \value{
 An object with values
