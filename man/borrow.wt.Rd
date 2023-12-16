@@ -33,7 +33,7 @@ borrow.wt(
 
 \item{delta_threshold}{Borrow when abs(pc (current study) - pch) <= delta_threshold}
 
-\item{method}{Method for dynamic borrowing, "Empirical Bayes" or "Heterogeneity".}
+\item{method}{Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", Density Product".}
 }
 \value{
 An object with values

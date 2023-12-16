@@ -50,7 +50,7 @@ Bayesian.Hybrid.Design(
 
 \item{delta_threshold}{Borrow when abs(pc_hat (current study) - pch) <= delta_threshold}
 
-\item{method}{Method for dynamic borrowing, "Empirical Bayes" or "Heterogeneity".}
+\item{method}{Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", Density Product".}
 
 \item{nsim}{Number of replications to calculate power}
 
