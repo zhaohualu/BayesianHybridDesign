@@ -18,7 +18,8 @@
 #' @param method Method for dynamic borrowing, "Empirical Bayes" or "Heterogeneity".
 #' @param nsim Number of replications to calculate power
 #' @param seed=2000 seed for simulations
-#'  
+#' @param method Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", Density Product".
+#' 
 #' @return An object with values
 #'  \itemize{
 #'  \item power study power
@@ -85,7 +86,7 @@ Bayesian.Hybrid.Design = function(pt=0.512, nt=40,pc=0.312,nc=40,pch=0.312,
   set.seed(seed)
   
   success = 0
-  median_hca = rep(NA, nsim)
+  median_hca = median_c = rep(NA, nsim)
   
   #for each simulated trial, determine whether significant  
   for(i in 1:nsim){
@@ -122,11 +123,12 @@ Bayesian.Hybrid.Design = function(pt=0.512, nt=40,pc=0.312,nc=40,pch=0.312,
     success = success + (phat_pt_larger_pc>sig)
     
     median_hca[i] = qbeta(0.5, apost_c_hca, bpost_c_hca)
+    median_c[i] = qbeta(0.5, apost_c_trial, bpost_c_trial)
     
   }
   power = success / nsim
-  pc.bias = mean(median_hca-pc)
-  pc.mse = mean((median_hca-pc)^2)
+  pc.bias = mean(median_hca-median_c)
+  pc.mse = mean((median_hca-median_c)^2)
   
   return(list(power = power, 
               delta.bound=delta.bound, 

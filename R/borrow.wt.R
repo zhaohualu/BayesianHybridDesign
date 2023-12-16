@@ -10,7 +10,7 @@
 #' @param a0c hyperprior for control response rate beta(a0c, b0c)
 #' @param b0c hyperprior for control response rate beta(a0c, b0c)
 #' @param delta_threshold Borrow when abs(pc (current study) - pch) <= delta_threshold
-#' @param method Method for dynamic borrowing, "Empirical Bayes" or "Heterogeneity".
+#' @param method Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", Density Product".
 #'   
 #' @return An object with values
 #'  \itemize{
@@ -42,9 +42,14 @@ borrow.wt = function (Yc=40*0.312, nc=40,
       lbeta(a0  + w*Y0, b0 + w*(n0-Y0))
   }
   
+  ac = a0c + Yc
+  bc = b0c + (nc - Yc)
+  ach = a0c + a*Ych
+  bch = b0c + a*(nch - Ych)
+  
   if (method =="Empirical Bayes") {
     #Empirical weight
-    we = optimize(logwfunction, c(0,1),
+    wd = optimize(logwfunction, c(0,1),
                   a0 = a0c,
                   b0 = b0c,
                   Y = Yc,
@@ -52,7 +57,7 @@ borrow.wt = function (Yc=40*0.312, nc=40,
                   Y0 = Ych,
                   n0 = nch,
                   maximum = TRUE)$maximum
-  } else if (method == "Heterogeneity") {
+  } else if (method == "Bayesian p") {
     #Heterogeneity
     
     #P(p_c > p_ch)
@@ -63,19 +68,23 @@ borrow.wt = function (Yc=40*0.312, nc=40,
     P_ch_p_c = function(y,ac,bc,ach,bch){
       pbeta(y,ach,bch,lower.tail=F)*dbeta(y,ac,bc)
     }
-    xi1 = integrate(P_c_p_ch, lower=0.0001, upper=0.9999,
-                    ac = a0c + Yc, bc = b0c + (nc - Yc),
-                    ach = a0c + a*Ych, bch=b0c + a*(nch - Ych))$value
-    xi2 = integrate(P_ch_p_c, lower=0.0001, upper=0.9999,
-                    ac = a0c + Yc, bc = b0c + (nc - Yc),
-                    ach = a0c + a*Ych, bch=b0c + a*(nch - Ych))$value
-    we = 2*min(xi1, xi2)
+    xi1 = integrate(P_c_p_ch, lower=0, upper=1,
+                    ac = ac, bc = bc, ach = ach, bch=bch)$value
+    xi2 = integrate(P_ch_p_c, lower=0, upper=1,
+                    ac = ac, bc = bc, ach = ach, bch=bch)$value
+    wd = 2*min(xi1, xi2)
+  } else if (method == "Density Product") {
+    # \int_0^1 \sqrt{f_1(x)f_2(x)}dx
+    f.den = function(y){
+      sqrt(dbeta(y,ac,bc)*dbeta(y,ach,bch))
+    }
+    wd = integrate(f.den, lower=0, upper=1)$value
   }
   
   #Overall weight
-  w = we * a * (abs(Yc/nc - Ych/nch) < delta_threshold)
+  w = wd * a * (abs(Yc/nc - Ych/nch) < delta_threshold)
   
-  return(list(a=a, we=we, w=w))
+  return(list(a=a, wd=wd, w=w))
 }
 
 
