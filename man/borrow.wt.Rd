@@ -34,15 +34,15 @@ borrow.wt(
 
 \item{delta_threshold}{Borrow when abs(pc (current study) - pch) <= delta_threshold}
 
-\item{method}{Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", Density Product".}
+\item{method}{Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Expected Bayes Factor",}
 
-\item{theta}{A parameter with a range of (0, 1), and only applicable to method = "Density Product", where the weight is defined as E_c((fch/fc)^theta).}
+\item{theta}{A parameter with a range of (0, 1), and applicable to method = "Density Product" or "JSD", where the weight is defined as E_c((fch/fc)^theta) for "density product" and (1-0.5*(KL(fc|fbar)+KL(fch|fbar)))^(1/theta), and fbar=(fc+fch)/2.}
 }
 \value{
 An object with values
 \itemize{
 \item a Global borrowing weight
-\item we Dynamic borrowingweight according to similarly of response rate
+\item wd Dynamic borrowingweight according to similarly of response rate
 \item w Overall borrowing weight
 }
 }
