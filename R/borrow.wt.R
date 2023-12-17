@@ -10,8 +10,8 @@
 #' @param a0c hyperprior for control response rate beta(a0c, b0c)
 #' @param b0c hyperprior for control response rate beta(a0c, b0c)
 #' @param delta_threshold Borrow when abs(pc (current study) - pch) <= delta_threshold
-#' @param method Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", Density Product".
-#' @param theta A parameter with a range of (0, 1), and only applicable to method = "Density Product", where the weight is defined as E_c((fch/fc)^theta).
+#' @param method Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Expected Bayes Factor", 
+#' @param theta A parameter with a range of (0, 1), and applicable to method = "Density Product" or "JSD", where the weight is defined as E_c((fch/fc)^theta) for "density product" and (1-0.5*(KL(fc|fbar)+KL(fch|fbar)))^(1/theta), and fbar=(fc+fch)/2.
 #'
 #' @return An object with values
 #'  \itemize{
@@ -74,13 +74,28 @@ borrow.wt = function (Yc=40*0.312, nc=40,
     xi2 = integrate(P_ch_p_c, lower=0, upper=1,
                     ac = ac, bc = bc, ach = ach, bch=bch)$value
     wd = 2*min(xi1, xi2)
-  } else if (method == "Density Product") {
+  } else if (method == "Expected Bayes Factor") {
     # \int_0^1 \sqrt{f_1(x)f_2(x)}dx
     f.den = function(y){
-      L = theta*log(dbeta(y,ach,bch))+(1-theta)*log(dbeta(y,ac,bc))
-      return(exp(L))
+      L1 = exp(theta*log(dbeta(y,ach,bch))+(1-theta)*log(dbeta(y,ac,bc)))
+      L2 = exp(theta*log(dbeta(y,ac,bc))+(1-theta)*log(dbeta(y,ach,bch)))
+      L = (L1+L2)/2
+      return(L)
     }
-    wd = integrate(f.den, lower=0, upper=1)$value
+    wd = integrate(f.den, lower=0.0001, upper=0.9999)$value
+  }else if (method == "JSD") {
+    
+    f.den = function(y){
+      fc = dbeta(y,ac,bc)
+      fch = dbeta(y,ach,bch)
+      fbar = (fc + fch)/2
+      
+      ans = log(fc/fbar)*fc + log(fch/fbar)*fch
+      return(ans)
+    }
+    eps = 1/theta
+    wd = (1-0.5*integrate(f.den, lower=0.0001, upper=0.999999)$value)^eps
+    
   } else if (method == "Density Product 2") {
     # \int_0^1 \sqrt{f_1(x)f_2(x)}dx
     f.den = function(y){
