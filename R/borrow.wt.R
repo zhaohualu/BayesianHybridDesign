@@ -33,16 +33,16 @@ borrow.wt = function (Yc=40*0.312, nc=40,
   #Global weight parameter for borrowing
   a = nche/nch
 
-  #Target function to optimize weight
-  logwfunction = function(w,a0,b0,Y,n,Y0,n0){
-    #a0, b0: beta hyper prior parameters beta(a0, b0)
-    #Y, n: current study number of responders and size in control
-    #Y0, n0: historical control for number of responders and size
-
-    lbeta(a0 + Y + w*Y0, b0 + (n-Y) + w*(n0-Y0)) -
-      lbeta(a0  + w*Y0, b0 + w*(n0-Y0))
+  #Target function to optimize weight for Empirical Bayes method
+  logwfunction = function(w,a0c,b0c,Yc,nc,Ych,nch){
+    #a0c, b0c: beta hyper prior parameters beta(a0c, b0c)
+    #Yc, nc: current study number of responders and size in control
+    #Ych, nch: historical control for number of responders and size
+    
+    beta(a0c + Yc + w*Ych*a, b0c + (nc-Yc) + w*(nch-Ych)*a)/
+      beta(a0c  + w*Ych*a, b0c + w*(nch-Ych)*a)
   }
-
+  
   ac = a0c + Yc
   bc = b0c + (nc - Yc)
   ach = a0c + a*Ych
@@ -51,12 +51,12 @@ borrow.wt = function (Yc=40*0.312, nc=40,
   if (method =="Empirical Bayes") {
     #Empirical weight
     wd = optimize(logwfunction, c(0,1),
-                  a0 = a0c,
-                  b0 = b0c,
-                  Y = Yc,
-                  n = nc,
-                  Y0 = Ych,
-                  n0 = nch,
+                  a0c = a0c,
+                  b0c = b0c,
+                  Yc = Yc,
+                  nc = nc,
+                  Ych = Ych,
+                  nch = nch,
                   maximum = TRUE)$maximum
   } else if (method == "Bayesian p") {
     #Heterogeneity
