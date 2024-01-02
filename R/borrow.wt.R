@@ -10,13 +10,13 @@
 #' @param a0c hyperprior for control response rate beta(a0c, b0c)
 #' @param b0c hyperprior for control response rate beta(a0c, b0c)
 #' @param delta_threshold Borrow when abs(pc (current study) - pch) <= delta_threshold
-#' @param method Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Expected Bayes Factor", 
-#' @param theta A parameter with a range of (0, 1), and applicable to method = "Density Product" or "JSD", where the weight is defined as E_c((fch/fc)^theta) for "density product" and (1-0.5*(KL(fc|fbar)+KL(fch|fbar)))^(1/theta), and fbar=(fc+fch)/2.
+#' @param method Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Expected Bayes Factor", "JSD"
+#' @param theta A parameter with a range of (0, 1), and applicable to method = "Expected Bayes Factor" or "JSD", where the weight is defined as E_c((fch/fc)^theta) for "Expected Bayes Factor" and (1-0.5*(KL(fc|fbar)+KL(fch|fbar)))^(1/theta), and fbar=(fc+fch)/2.
 #'
 #' @return An object with values
 #'  \itemize{
 #'  \item a Global borrowing weight
-#'  \item wd Dynamic borrowingweight according to similarly of response rate
+#'  \item wd Dynamic borrowing weight according to similarly of response rate
 #'  \item w Overall borrowing weight
 #'  }
 #' @examples
@@ -39,8 +39,8 @@ borrow.wt = function (Yc=40*0.312, nc=40,
     #Yc, nc: current study number of responders and size in control
     #Ych, nch: historical control for number of responders and size
     
-    beta(a0c + Yc + w*Ych*a, b0c + (nc-Yc) + w*(nch-Ych)*a)/
-      beta(a0c  + w*Ych*a, b0c + w*(nch-Ych)*a)
+    lbeta(a0c + Yc + w*Ych, b0c + (nc-Yc) + w*(nch-Ych)) -
+      lbeta(a0c  + w*Ych, b0c + w*(nch-Ych))
   }
   
   ac = a0c + Yc
