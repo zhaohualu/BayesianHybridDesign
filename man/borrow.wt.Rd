@@ -34,20 +34,24 @@ borrow.wt(
 
 \item{delta_threshold}{Borrow when abs(pc (current study) - pch) <= delta_threshold}
 
-\item{method}{Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Expected Bayes Factor",}
+\item{method}{Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Generalized BC", "JSD"}
 
-\item{theta}{A parameter with a range of (0, 1), and applicable to method = "Density Product" or "JSD", where the weight is defined as E_c((fch/fc)^theta) for "density product" and (1-0.5*(KL(fc|fbar)+KL(fch|fbar)))^(1/theta), and fbar=(fc+fch)/2.}
+\item{theta}{A parameter with a range of (0, 1), and applicable to method = "Generalized BC" or "JSD"}
 }
 \value{
 An object with values
 \itemize{
 \item a Global borrowing weight
-\item wd Dynamic borrowingweight according to similarly of response rate
+\item wd Dynamic borrowing weight according to similarly of response rate
 \item w Overall borrowing weight
 }
 }
 \description{
-This function calculates the borrowing weights for the hybrid control from historical study
+This function calculates the borrowing weights for the hybrid control from historical study.
+The following methods are included: (1) Empirical Bayes: dynamic weight is determined by maximizing marginal distribution;
+(2) Bayesian P value: similarity measured by Bayesian P value comparing two distributions;
+(3) Generalized Bhattacharyya Coefficient (BC): Bhattacharyya coefficient is a special case for theta = 0.5.
+(4) Jensen-Shannon divergence (JSD): a measurement of similarity for two distributions.
 }
 \examples{
 

@@ -19,6 +19,9 @@ Bayesian.Hybrid.Design(
   b0t = 0.001,
   delta_threshold = 0.1,
   method = "Empirical Bayes",
+  theta = 0.5,
+  datamat = NULL,
+  w0 = NULL,
   nsim = 10000,
   seed = 2000
 )
@@ -50,7 +53,9 @@ Bayesian.Hybrid.Design(
 
 \item{delta_threshold}{Borrow when abs(pc_hat (current study) - pch) <= delta_threshold}
 
-\item{method}{Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", Density Product".}
+\item{method}{Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Generalized BC", "JSD"}
+
+\item{datamat}{A matrix with dimension nsim * 2 containing the pre-simulated data for the study treatment (1st column) and control  (1st column) groups, respectively.}
 
 \item{nsim}{Number of replications to calculate power}
 
