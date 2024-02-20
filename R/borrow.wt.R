@@ -1,6 +1,10 @@
 #' Borrowing weights from historical study
 #'
-#' This function calculates the borrowing weights for the hybrid control from historical study
+#' This function calculates the borrowing weights for the hybrid control from historical study. 
+#' The following methods are included: (1) Empirical Bayes: dynamic weight is determined by maximizing marginal distribution;
+#' (2) Bayesian P value: similarity measured by Bayesian P value comparing two distributions;
+#' (3) Generalized Bhattacharyya Coefficient (BC): Bhattacharyya coefficient is a special case for theta = 0.5.
+#' (4) Jensen-Shannon divergence (JSD): a measurement of similarity for two distributions.
 #'
 #' @param Yc number of responders for control arm in current study
 #' @param nc number of patients in control arm in current study
@@ -10,9 +14,9 @@
 #' @param a0c hyperprior for control response rate beta(a0c, b0c)
 #' @param b0c hyperprior for control response rate beta(a0c, b0c)
 #' @param delta_threshold Borrow when abs(pc (current study) - pch) <= delta_threshold
-#' @param method Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Expected Bayes Factor", "JSD"
-#' @param theta A parameter with a range of (0, 1), and applicable to method = "Expected Bayes Factor" or "JSD", where the weight is defined as E_c((fch/fc)^theta) for "Expected Bayes Factor" and (1-0.5*(KL(fc|fbar)+KL(fch|fbar)))^(1/theta), and fbar=(fc+fch)/2.
-#'
+#' @param method Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Generalized BC", "JSD"
+#' @param theta A parameter with a range of (0, 1), and applicable to method = "Generalized BC" or "JSD"
+#
 #' @return An object with values
 #'  \itemize{
 #'  \item a Global borrowing weight
@@ -58,6 +62,16 @@ borrow.wt = function (Yc=40*0.312, nc=40,
                   Ych = Ych,
                   nch = nch,
                   maximum = TRUE)$maximum
+  }else if (method =="Empirical Bayes a") {
+    #Empirical weight
+    wd = optimize(logwfunction, c(0,1),
+                  a0c = a0c,
+                  b0c = b0c,
+                  Yc = Yc,
+                  nc = nc,
+                  Ych = a*Ych,
+                  nch = a*nch,
+                  maximum = TRUE)$maximum
   } else if (method == "Bayesian p") {
     #Heterogeneity
 
@@ -74,7 +88,7 @@ borrow.wt = function (Yc=40*0.312, nc=40,
     xi2 = integrate(P_ch_p_c, lower=0, upper=1,
                     ac = ac, bc = bc, ach = ach, bch=bch)$value
     wd = 2*min(xi1, xi2)
-  } else if (method == "Expected Bayes Factor") {
+  } else if (method == "Generalized BC") {
     # \int_0^1 \sqrt{f_1(x)f_2(x)}dx
     f.den = function(y){
       L1 = exp(theta*log(dbeta(y,ach,bch))+(1-theta)*log(dbeta(y,ac,bc)))
