@@ -14,7 +14,8 @@ borrow.wt(
   b0c = 0.001,
   delta_threshold = 0.1,
   method = "Empirical Bayes",
-  theta = 0.5
+  theta = NULL,
+  eta = 1
 )
 }
 \arguments{
@@ -36,7 +37,9 @@ borrow.wt(
 
 \item{method}{Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Generalized BC", "JSD"}
 
-\item{theta}{A parameter with a range of (0, 1), and applicable to method = "Generalized BC" or "JSD"}
+\item{theta}{A parameter with a range of (0, 1), and applicable to "Generalized BC".}
+
+\item{eta}{A parameter with a range of (0, infty), and applicable to methods "Bayesian p", "Generalized BC", "JSD". Default 1.}
 }
 \value{
 An object with values
@@ -55,6 +58,6 @@ The following methods are included: (1) Empirical Bayes: dynamic weight is deter
 }
 \examples{
 
-borrow.wt(Yc=40*0.312, nc=40, Ych=234*0.312, nch=234, nche=40, a0c=0.001, b0c=0.001, delta_threshold=0.1)
+borrow.wt(Yc=40*0.312, nc=40, Ych=234*0.312, nch=234, nche=40, a0c=0.001, b0c=0.001, delta_threshold=0.1, eta=1)
 
 }
