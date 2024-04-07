@@ -15,8 +15,9 @@
 #' @param b0c hyperprior for control response rate beta(a0c, b0c)
 #' @param delta_threshold Borrow when abs(pc (current study) - pch) <= delta_threshold
 #' @param method Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Generalized BC", "JSD"
-#' @param theta A parameter with a range of (0, 1), and applicable to method = "Generalized BC" or "JSD"
-#
+#' @param theta A parameter with a range of (0, 1), and applicable to "Generalized BC".
+#' @param eta A parameter with a range of (0, infty), and applicable to methods "Bayesian p", "Generalized BC", "JSD". Default 1.
+#' 
 #' @return An object with values
 #'  \itemize{
 #'  \item a Global borrowing weight
@@ -25,14 +26,15 @@
 #'  }
 #' @examples
 #'
-#' borrow.wt(Yc=40*0.312, nc=40, Ych=234*0.312, nch=234, nche=40, a0c=0.001, b0c=0.001, delta_threshold=0.1)
+#' borrow.wt(Yc=40*0.312, nc=40, Ych=234*0.312, nch=234, nche=40, a0c=0.001, b0c=0.001, delta_threshold=0.1, eta=1)
 #'
 #' @export
 #'
 borrow.wt = function (Yc=40*0.312, nc=40,
                       Ych=234*0.312, nch=234, nche=40,
                       a0c=0.001, b0c=0.001,
-                      delta_threshold=0.1, method="Empirical Bayes", theta=0.5){
+                      delta_threshold=0.1, 
+                      method="Empirical Bayes", theta=NULL, eta=1){
 
   #Global weight parameter for borrowing
   a = nche/nch
@@ -77,38 +79,61 @@ borrow.wt = function (Yc=40*0.312, nc=40,
 
     #P(p_c > p_ch)
     P_c_p_ch = function(y,ac,bc,ach,bch){
-      pbeta(y,ac,bc,lower.tail=F)*dbeta(y,ach,bch)
+      p = pbeta(y,ac,bc,lower.tail=F)*dbeta(y,ach,bch)
+      Idx = is.infinite(p)
+      p[Idx] = sign(p[Idx]) * 1e10
+      return(p)
     }
     #P(p_ch > p_c)
     P_ch_p_c = function(y,ac,bc,ach,bch){
-      pbeta(y,ach,bch,lower.tail=F)*dbeta(y,ac,bc)
+      p=pbeta(y,ach,bch,lower.tail=F)*dbeta(y,ac,bc)
+      Idx = is.infinite(p)
+      p[Idx] = sign(p[Idx]) * 1e10
+      return(p)
     }
-    xi1 = integrate(P_c_p_ch, lower=0, upper=1,
+    xi1 = integrate(P_c_p_ch, lower=0.0001, upper=0.9999,
                     ac = ac, bc = bc, ach = ach, bch=bch)$value
-    xi2 = integrate(P_ch_p_c, lower=0, upper=1,
+    xi2 = integrate(P_ch_p_c, lower=0.0001, upper=0.9999,
                     ac = ac, bc = bc, ach = ach, bch=bch)$value
-    wd = 2*min(xi1, xi2)
+    wd = (2*min(xi1, xi2))^eta
   } else if (method == "Generalized BC") {
     # \int_0^1 \sqrt{f_1(x)f_2(x)}dx
     f.den = function(y){
       L1 = exp(theta*log(dbeta(y,ach,bch))+(1-theta)*log(dbeta(y,ac,bc)))
       L2 = exp(theta*log(dbeta(y,ac,bc))+(1-theta)*log(dbeta(y,ach,bch)))
       L = (L1+L2)/2
+      Idx = is.infinite(L)
+      L[Idx] = sign(L[Idx]) * 1e10
       return(L)
     }
     wd = integrate(f.den, lower=0.0001, upper=0.9999)$value
+    wd = wd^eta
   }else if (method == "JSD") {
     
     f.den = function(y){
-      fc = dbeta(y,ac,bc)
-      fch = dbeta(y,ach,bch)
-      fbar = (fc + fch)/2
+      logfc = dbeta(y,ac,bc,log = T)
+      logfch = dbeta(y,ach,bch,log=T)
+      logfbar = log((exp(logfc) + exp(logfch))/2)
       
-      ans = log(fc/fbar)*fc + log(fch/fbar)*fch
+      
+      ans = (logfc-logfbar)*exp(logfc) + (logfch-logfbar)*exp(logfch)
+      # print("logfc")
+      # print(logfc)
+      # print("logfbar")
+      # print(logfbar)
+      # print("logfch")
+      # print(logfch)
+      # print(ans)
+      
+      Idx = is.infinite(ans)
+      ans[Idx] = sign(ans[Idx]) * 1e10
+      Idx = is.na(ans)
+      ans[Idx] = mean(ans[!Idx])
+      #
       return(ans)
     }
     eps = 1/theta
-    wd = (1-0.5*integrate(f.den, lower=0.0001, upper=0.999999)$value)^eps
+    wd = (1-0.5*integrate(f.den, lower=0.0001, upper=0.9999)$value)^eps
     
   } else if (method == "Density Product 2") {
     # \int_0^1 \sqrt{f_1(x)f_2(x)}dx
@@ -125,6 +150,7 @@ borrow.wt = function (Yc=40*0.312, nc=40,
       sqrt(integrate(fc.den, lower=0.0001, upper=0.9999)$value * integrate(fch.den, lower=0.0001, upper=0.9999)$value)
 
   } else{
+    print(method)
     stop("method not supported!")
   }
 

@@ -3,23 +3,26 @@
 #' This function calculates the power and design parameters Bayesian Hybrid Design using dynamic power prior approach.
 #' 
 #' @param pt response rate for experimental arm in current study
-#' @param nt number of patients in experimental arm in current study    
-#' @param nc number of patients in control arm in current study  
+#' @param nt number of patients in experimental arm in current study 
+#' @param pc Response rate for control arm in current study   
+#' @param nc number of patients in control arm in current study
+#' @param pch Response rate for control treatment in historical study  
 #' @param nche Equivalent number of patients borrowed from historical study
 #' @param nch Total number of patients in historical control
-#' @param pc Response rate for control arm in current study
-#' @param pch Response rate for control treatment in historical study
-#' @param sig Significance boundary defined as P(pt_hat > pc_hat|hybrid) > sig
+#' @param alpha Decision rule is P(pt>pc|study data, historical data) > 1-alpha. Alpha is close to Type_I error rate. In order to get pre-determined Type_I error rate, alpha needs to be calibrated by the calibration function.
 #' @param a0c Hyperprior for control response rate beta(a0c, b0c)
 #' @param b0c Hyperprior for control response rate beta(a0c, b0c)
 #' @param a0t Hyperprior for experimental response rate beta(a0t, b0t)
 #' @param b0t Hyperprior for experimental response rate beta(a0t, b0t)
 #' @param delta_threshold Borrow when abs(pc_hat (current study) - pch) <= delta_threshold 
-#' @param method Method for dynamic borrowing, "Empirical Bayes" or "Heterogeneity".
-#' @param datamat A matrix with dimension nsim * 2 containing the pre-simulated data for the study treatment (1st column) and control  (1st column) groups, respectively.
+#' @param method Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Generalized BC", "JSD"
+#' @param theta A parameter with a range of (0, 1), and applicable to method: "Generalized BC".
+#' @param eta A parameter with a range of (0, infty), and applicable to method: "Bayesian p", "Generalized BC", "JSD". "Generalized BC" method requires two parameters theta and eta.
+#' @param datamat A matrix with dimension nsim * 2 containing the pre-simulated data for the study treatment (1st column) and control  (1st column) groups, respectively. If not supplied, binomial random Monte Carlo samples will be generated in the function.
+#' @param w0 prior power parameters w. If not specified (default), w_d is calculated by the specified method for dynamic borrowing.
 #' @param nsim Number of replications to calculate power
 #' @param seed=2000 seed for simulations
-#' @param method Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Generalized BC", "JSD"
+#' 
 #' 
 #' @return An object with values
 #'  \itemize{
@@ -30,26 +33,37 @@
 #'  }
 #' @examples
 #' 
-#' Bayesian.Hybrid.Design(pt=0.512, nt=40,pc=0.312,nc=40,pch=0.312,nche=40,nch=234, sig=0.90,a0c=0.001,b0c=0.001,a0t=0.001,b0t=0.001,delta_threshold=0.1)
+#' o=Bayesian.Hybrid.Design(pt=0.512, nt=40,pc=0.312,nc=40,pch=0.312,nche=40,nch=234, alpha=0.1,a0c=0.001,b0c=0.001,a0t=0.001,b0t=0.001,delta_threshold=0.1)
 #' 
 #' @export
 #' 
-Bayesian.Hybrid.Design = function(pt=0.512, nt=40,pc=0.312,nc=40,pch=0.312,
-                                  nche=40,nch=234, sig=0.90,
+Bayesian.Hybrid.Design = function(pt=0.512, nt=40,pc=0.312,
+                                  nc=40,pch=0.312,nche=40,nch=234, alpha=0.1, 
+                                  tau=NULL,
                                   a0c=0.001,b0c=0.001,a0t=0.001,b0t=0.001,
                                   delta_threshold=0.1, 
-                                  method="Empirical Bayes", theta=0.5,
+                                  method="Empirical Bayes", theta=0.5, eta=1,
                                   datamat = NULL, w0 = NULL,
-                                  nsim = 10000, seed=2000){
+                                  nsim = 100000, seed=2000){
+  #Threshold of significance tau for P(pt>pc|hybrid data) > tau
+  if(is.null(tau)){
+    tau = calibration (nt=nt, pc=pc, nc=nc, pch=pch, 
+                       nche=nche, nch=nch, 
+                       alpha = alpha, a0c=a0c, b0c=b0c, a0t=a0t, b0t=b0t, 
+                       delta_threshold=delta_threshold, method=method, 
+                       theta=theta, eta=eta, nsim = nsim, seed=seed)
+  }
   
   #Dynamic borrowing parameter
   if(is.null(w0)){
     wt = borrow.wt(Yc=nc*pc, nc=nc, Ych=nch*pch, nch=nch, nche=nche, 
-                   a0c=a0c, b0c=b0c, delta_threshold=delta_threshold, method=method)
+                   a0c=a0c, b0c=b0c, delta_threshold=delta_threshold, 
+                   method=method,theta=theta,eta=eta)
     w = wt$w
   } else {
     w=w0
   }
+  
   #All scenarios for number of responders in exp arm
   Yt = 0:nt # start from 0
   Yc = nc*pc #number of responders in control arm
@@ -81,7 +95,8 @@ Bayesian.Hybrid.Design = function(pt=0.512, nt=40,pc=0.312,nc=40,pch=0.312,
   }
   
   #min detectable response difference: delta.bound
-  BoundaryIdx = which((phat_pt_larger_pc>=sig))
+  delta.bound = NA
+  BoundaryIdx = which((phat_pt_larger_pc>=tau))
   if(length(BoundaryIdx)){
     delta.bound = (BoundaryIdx[1]-1)/nt-pc # - because SumDatat starts from 0
   }
@@ -93,6 +108,7 @@ Bayesian.Hybrid.Design = function(pt=0.512, nt=40,pc=0.312,nc=40,pch=0.312,
   
   success = 0
   median_hca = median_c = rep(NA, nsim)
+  mean_hca = mean_c = rep(NA, nsim)
   phat_pt_larger_pc_all = rep(NA, nsim)
   
   datamat2 = matrix(NA,nsim,2)
@@ -115,7 +131,7 @@ Bayesian.Hybrid.Design = function(pt=0.512, nt=40,pc=0.312,nc=40,pch=0.312,
     if(is.null(w0)){
       wt = borrow.wt(Yc=Yc.s, nc=nc, Ych=nch*pch, nch=nch, nche=nche,  
                      a0c=a0c, b0c=b0c, delta_threshold=delta_threshold, 
-                     method=method, theta=theta)
+                     method=method, theta=theta, eta=eta)
       w = wt$w
     }else{
       w = w0
@@ -144,22 +160,30 @@ Bayesian.Hybrid.Design = function(pt=0.512, nt=40,pc=0.312,nc=40,pch=0.312,
     
     phat_pt_larger_pc_all[i] = phat_pt_larger_pc
     
-    success = success + (phat_pt_larger_pc>sig)
+    success = success + (phat_pt_larger_pc>tau)
     
     median_hca[i] = qbeta(0.5, apost_c_hca, bpost_c_hca)
     median_c[i] = qbeta(0.5, apost_c_trial, bpost_c_trial)
     
+    mean_hca[i] = apost_c_hca/(apost_c_hca + bpost_c_hca)
+    mean_c[i] = apost_c_trial/(apost_c_trial + bpost_c_trial)    
+    
     wvec[i] = w
     
   }
-  power = success / nsim
+  power = as.numeric(success) / nsim
   pc.bias = mean(median_hca-median_c)
   pc.mse = mean((median_hca-median_c)^2)
   
-  return(list(power = power, 
+  pc.bias.mean = mean(mean_hca-mean_c)
+  pc.mse.mean = mean((mean_hca-mean_c)^2)
+  
+  return(list(power = power, tau = tau,
               delta.bound=delta.bound, 
               pc.bias=pc.bias, 
               pc.mse=pc.mse, 
+              pc.bias.mean=pc.bias.mean, 
+              pc.mse.mean=pc.mse.mean, 
               phat_pt_larger_pc_all = phat_pt_larger_pc_all,
               median_hca = median_hca,
               median_c = median_c,
