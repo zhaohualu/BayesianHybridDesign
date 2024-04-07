@@ -132,8 +132,8 @@ borrow.wt = function (Yc=40*0.312, nc=40,
       #
       return(ans)
     }
-    eps = 1/theta
-    wd = (1-0.5*integrate(f.den, lower=0.0001, upper=0.9999)$value)^eps
+    
+    wd = (1-0.5*integrate(f.den, lower=0.0001, upper=0.9999)$value)^eta
     
   } else if (method == "Density Product 2") {
     # \int_0^1 \sqrt{f_1(x)f_2(x)}dx
