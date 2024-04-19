@@ -1,23 +1,23 @@
 #' Borrowing weights from historical study
 #'
-#' This function calculates the borrowing weights for the hybrid control from historical study. 
+#' This function calculates the borrowing weights for the hybrid control from historical study.
 #' The following methods are included: (1) Empirical Bayes: dynamic weight is determined by maximizing marginal distribution;
 #' (2) Bayesian P value: similarity measured by Bayesian P value comparing two distributions;
 #' (3) Generalized Bhattacharyya Coefficient (BC): Bhattacharyya coefficient is a special case for theta = 0.5.
 #' (4) Jensen-Shannon divergence (JSD): a measurement of similarity for two distributions.
 #'
-#' @param Yc number of responders for control arm in current study
-#' @param nc number of patients in control arm in current study
-#' @param Ych number of responders for control treatment in historical study
-#' @param nch Total number of patients in historical control
-#' @param nche Equivalent number of patients borrowed from historical study
-#' @param a0c hyperprior for control response rate beta(a0c, b0c)
-#' @param b0c hyperprior for control response rate beta(a0c, b0c)
-#' @param delta_threshold Borrow when abs(pc (current study) - pch) <= delta_threshold
-#' @param method Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Generalized BC", "JSD"
-#' @param theta A parameter with a range of (0, 1), and applicable to "Generalized BC".
-#' @param eta A parameter with a range of (0, infty), and applicable to methods "Bayesian p", "Generalized BC", "JSD". Default 1.
-#' 
+#' @param Yc A scalar number of responders for control arm in current study
+#' @param nc A scalar number of patients in control arm in current study
+#' @param Ych A scalar number of responders for control treatment in historical study
+#' @param nch A scalar total number of patients in historical control
+#' @param nche A scalar for the equivalent number of patients borrowed from historical study
+#' @param a0c The 1st scale hyperprior hyperparameter for control response rate beta(a0c, b0c). Default 0.001.
+#' @param b0c The 2nd hyperprior hyperparameter for control response rate beta(a0c, b0c). Default 0.001.
+#' @param delta_threshold A scale threshold parameter. Only if abs(pc (current study) - pch) <= delta_threshold, we borrow from historical control. Default 0.1.
+#' @param method A string characters. Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Generalized BC", "JSD"
+#' @param theta A scalar parameter with a range of (0, 1), and applicable to "Generalized BC". Default 0.5.
+#' @param eta A scalar parameter with a range of (0, infty), and applicable to methods "Bayesian p", "Generalized BC", "JSD". Default 1.
+#'
 #' @return An object with values
 #'  \itemize{
 #'  \item a Global borrowing weight
@@ -26,15 +26,15 @@
 #'  }
 #' @examples
 #'
-#' borrow.wt(Yc=40*0.312, nc=40, Ych=234*0.312, nch=234, nche=40, a0c=0.001, b0c=0.001, delta_threshold=0.1, eta=1)
+#' borrow.wt(Yc=40*0.3, nc=40, Ych=180*0.3, nch=180, nche=40, a0c=0.001, b0c=0.001, delta_threshold=0.1, eta=1)
 #'
 #' @export
 #'
-borrow.wt = function (Yc=40*0.312, nc=40,
-                      Ych=234*0.312, nch=234, nche=40,
+borrow.wt = function (Yc, nc,
+                      Ych, nch, nche,
                       a0c=0.001, b0c=0.001,
-                      delta_threshold=0.1, 
-                      method="Empirical Bayes", theta=NULL, eta=1){
+                      delta_threshold=0.1,
+                      method="Empirical Bayes", theta=0.5, eta=1){
 
   #Global weight parameter for borrowing
   a = nche/nch
@@ -44,11 +44,11 @@ borrow.wt = function (Yc=40*0.312, nc=40,
     #a0c, b0c: beta hyper prior parameters beta(a0c, b0c)
     #Yc, nc: current study number of responders and size in control
     #Ych, nch: historical control for number of responders and size
-    
+
     lbeta(a0c + Yc + w*Ych, b0c + (nc-Yc) + w*(nch-Ych)) -
       lbeta(a0c  + w*Ych, b0c + w*(nch-Ych))
   }
-  
+
   ac = a0c + Yc
   bc = b0c + (nc - Yc)
   ach = a0c + a*Ych
@@ -109,13 +109,13 @@ borrow.wt = function (Yc=40*0.312, nc=40,
     wd = integrate(f.den, lower=0.0001, upper=0.9999)$value
     wd = wd^eta
   }else if (method == "JSD") {
-    
+
     f.den = function(y){
       logfc = dbeta(y,ac,bc,log = T)
       logfch = dbeta(y,ach,bch,log=T)
       logfbar = log((exp(logfc) + exp(logfch))/2)
-      
-      
+
+
       ans = (logfc-logfbar)*exp(logfc) + (logfch-logfbar)*exp(logfch)
       # print("logfc")
       # print(logfc)
@@ -124,7 +124,7 @@ borrow.wt = function (Yc=40*0.312, nc=40,
       # print("logfch")
       # print(logfch)
       # print(ans)
-      
+
       Idx = is.infinite(ans)
       ans[Idx] = sign(ans[Idx]) * 1e10
       Idx = is.na(ans)
@@ -132,9 +132,9 @@ borrow.wt = function (Yc=40*0.312, nc=40,
       #
       return(ans)
     }
-    
+
     wd = (1-0.5*integrate(f.den, lower=0.0001, upper=0.9999)$value)^eta
-    
+
   } else if (method == "Density Product 2") {
     # \int_0^1 \sqrt{f_1(x)f_2(x)}dx
     f.den = function(y){
