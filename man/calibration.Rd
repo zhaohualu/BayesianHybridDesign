@@ -5,12 +5,12 @@
 \title{Calibration for Bayesian Hybrid Design}
 \usage{
 calibration(
-  nt = 40,
-  pc = 0.312,
-  nc = 40,
-  pch = 0.312,
-  nche = 40,
-  nch = 234,
+  nt,
+  pc.calib,
+  nc,
+  pch,
+  nche,
+  nch,
   alpha = 0.1,
   a0c = 0.001,
   b0c = 0.001,
@@ -27,56 +27,59 @@ calibration(
 )
 }
 \arguments{
-\item{nt}{number of patients in experimental arm in current study}
+\item{nt}{A scalar number of patients in experimental arm in current study}
 
-\item{pc}{Response rate for control arm in current study}
+\item{pc.calib}{A scalar. Response rate for control arm in current study for calibration. Usually, pc.calib = pch.}
 
-\item{nc}{number of patients in control arm in current study}
+\item{nc}{A scalar number of patients in control arm in current study}
 
-\item{pch}{Response rate for control treatment in historical study}
+\item{pch}{A scalar. Response rate for control treatment in historical study}
 
-\item{nche}{Equivalent number of patients borrowed from historical study}
+\item{nche}{A scalar representing the equivalent number of patients borrowed from historical study}
 
-\item{nch}{Total number of patients in historical control}
+\item{nch}{A scalar for total number of patients in historical control}
 
-\item{alpha}{Type I error rate. The Bayesian decision threshold tau is calibrated towards this rate.}
+\item{alpha}{A scalar. One sided type I error rate.}
 
-\item{a0c}{Hyperprior for control response rate beta(a0c, b0c)}
+\item{a0c}{A scalar. Hyperprior for control response rate beta(a0c, b0c)}
 
-\item{b0c}{Hyperprior for control response rate beta(a0c, b0c)}
+\item{b0c}{A scalar. Hyperprior for control response rate beta(a0c, b0c)}
 
-\item{a0t}{Hyperprior for experimental response rate beta(a0t, b0t)}
+\item{a0t}{A scalar. Hyperprior for experimental response rate beta(a0t, b0t)}
 
-\item{b0t}{Hyperprior for experimental response rate beta(a0t, b0t)}
+\item{b0t}{A scalar. Hyperprior for experimental response rate beta(a0t, b0t)}
 
-\item{delta_threshold}{Borrow when abs(pc_hat (current study) - pch) <= delta_threshold}
+\item{delta_threshold}{A scale threshold parameter. Only if abs(pc (current study) - pch) <= delta_threshold, we borrow from historical control. Default 0.1.}
 
-\item{method}{Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Generalized BC", "JSD"}
+\item{method}{A string characters. Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Generalized BC", "JSD"}
 
-\item{theta}{A parameter with a range of (0, 1), and applicable to "Generalized BC".}
+\item{theta}{A scalar parameter with a range of (0, 1), and applicable to "Generalized BC". Default 0.5.}
 
-\item{eta}{A parameter with a range of (0, infty), and applicable to methods "Bayesian p", "Generalized BC", "JSD". Default 1.}
+\item{eta}{A scalar parameter with a range of (0, infty), and applicable to methods "Bayesian p", "Generalized BC", "JSD". Default 1.}
 
-\item{datamat}{A matrix with dimension nsim * 2 containing the pre-simulated data for the study treatment (1st column) and control  (1st column) groups, respectively. If not supplied, binomial random Monte Carlo samples will be generated in the function.}
+\item{datamat}{A matrix with dimension nsim * 2 containing the pre-simulated data for the study treatment (1st column) and control  (1st column) groups, respectively. Default is NULL, and binomial random Monte Carlo samples will be generated in the function.}
 
-\item{w0}{prior power parameters w. If not specified (default), w_d is calculated by the specified method for dynamic borrowing.}
+\item{w0}{A scale prior power parameters w. If not specified (default), w_d is calculated by the specified method for dynamic borrowing.}
 
-\item{nsim}{Number of replications to calculate power}
+\item{nsim}{A scalar. Number of replications to calculate power}
 
-\item{seed=2024}{seed for simulations}
+\item{seed}{A scalar. seed for simulations}
 }
 \value{
-The threshold for statistical significance that can control the type I error (1-sided)
+The scalar threshold for statistical significance that can control the type I error (1-sided)
 }
 \description{
 This function calculates the threshold tau for calibration of Bayesian Hybrid Design.
-P(pt>pc|hybrid data)>tau is used to determin statistical significance.
+P(pt>pc|hybrid data)>tau is used to determine statistical significance.
 }
 \examples{
 
-calibration (nt=45, pc=0.312, nc=45, pch=0.312, nche=45, nch=234, alpha = 0.10, a0c=0.001, b0c=0.001, a0t=0.001, b0t=0.001, delta_threshold=0.1, method="Empirical Bayes", nsim = 100000, seed=2024)
-calibration (nt=45, pc=0.312, nc=45, pch=0.312, nche=45, nch=234, alpha = 0.10, a0c=0.001, b0c=0.001, a0t=0.001, b0t=0.001, delta_threshold=0.1, method="Generalized BC", theta=0.5, eta=1, nsim = 100000, seed=2024)
-calibration (nt=45, pc=0.312, nc=45, pch=0.312, nche=45, nch=234, alpha = 0.10, a0c=0.001, b0c=0.001, a0t=0.001, b0t=0.001, delta_threshold=0.1, method="Bayesian p", theta=NULL, eta=1, nsim = 100000, seed=2000)
-calibration (nt=45, pc=0.312, nc=45, pch=0.312, nche=45, nch=234, alpha = 0.10, a0c=0.001, b0c=0.001, a0t=0.001, b0t=0.001, delta_threshold=0.1, method="JSD", theta=NULL, eta=2, nsim = 100000, seed=2000)
+tau = calibration = function(nt=40, pc.calib=0.3, nc=40,
+pch=0.3, nche=40, nch=200,
+alpha = 0.10,
+a0c=0.001, b0c=0.001,a0t=0.001,b0t=0.001,
+delta_threshold=0.1,
+method="Empirical Bayes", theta=0.5,eta=1,
+nsim = 10000, seed=2000)
 
 }

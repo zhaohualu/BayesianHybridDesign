@@ -4,7 +4,7 @@
 \alias{fisher.bound}
 \title{Rejection boundary by Fisher's exact test}
 \usage{
-fisher.bound(pc = 0.312, nc, nt, alpha = 0.1)
+fisher.bound(pc, nc, nt, alpha = 0.1)
 }
 \arguments{
 \item{pc}{response rate for control arm}
@@ -13,7 +13,7 @@ fisher.bound(pc = 0.312, nc, nt, alpha = 0.1)
 
 \item{nt}{number of patients in experimental arm}
 
-\item{alpha}{p-value threshold for significance. Alpha must be one-sided.}
+\item{alpha}{p-value threshold for significance. Alpha must be one-sided. Default 0.1.}
 }
 \value{
 An object with values
@@ -32,6 +32,6 @@ This function calculates the minimum detectable difference in response rate when
 }
 \examples{
 
-fisher.bound(pc=0.312,nc=40,nt=40,alpha=0.1)
+fisher.bound(pc=0.3,nc=40,nt=40,alpha=0.1)
 
 }

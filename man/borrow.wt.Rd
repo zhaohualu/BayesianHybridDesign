@@ -5,41 +5,41 @@
 \title{Borrowing weights from historical study}
 \usage{
 borrow.wt(
-  Yc = 40 * 0.312,
-  nc = 40,
-  Ych = 234 * 0.312,
-  nch = 234,
-  nche = 40,
+  Yc,
+  nc,
+  Ych,
+  nch,
+  nche,
   a0c = 0.001,
   b0c = 0.001,
   delta_threshold = 0.1,
   method = "Empirical Bayes",
-  theta = NULL,
+  theta = 0.5,
   eta = 1
 )
 }
 \arguments{
-\item{Yc}{number of responders for control arm in current study}
+\item{Yc}{A scalar number of responders for control arm in current study}
 
-\item{nc}{number of patients in control arm in current study}
+\item{nc}{A scalar number of patients in control arm in current study}
 
-\item{Ych}{number of responders for control treatment in historical study}
+\item{Ych}{A scalar number of responders for control treatment in historical study}
 
-\item{nch}{Total number of patients in historical control}
+\item{nch}{A scalar total number of patients in historical control}
 
-\item{nche}{Equivalent number of patients borrowed from historical study}
+\item{nche}{A scalar for the equivalent number of patients borrowed from historical study}
 
-\item{a0c}{hyperprior for control response rate beta(a0c, b0c)}
+\item{a0c}{The 1st scale hyperprior hyperparameter for control response rate beta(a0c, b0c). Default 0.001.}
 
-\item{b0c}{hyperprior for control response rate beta(a0c, b0c)}
+\item{b0c}{The 2nd hyperprior hyperparameter for control response rate beta(a0c, b0c). Default 0.001.}
 
-\item{delta_threshold}{Borrow when abs(pc (current study) - pch) <= delta_threshold}
+\item{delta_threshold}{A scale threshold parameter. Only if abs(pc (current study) - pch) <= delta_threshold, we borrow from historical control. Default 0.1.}
 
-\item{method}{Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Generalized BC", "JSD"}
+\item{method}{A string characters. Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Generalized BC", "JSD"}
 
-\item{theta}{A parameter with a range of (0, 1), and applicable to "Generalized BC".}
+\item{theta}{A scalar parameter with a range of (0, 1), and applicable to "Generalized BC". Default 0.5.}
 
-\item{eta}{A parameter with a range of (0, infty), and applicable to methods "Bayesian p", "Generalized BC", "JSD". Default 1.}
+\item{eta}{A scalar parameter with a range of (0, infty), and applicable to methods "Bayesian p", "Generalized BC", "JSD". Default 1.}
 }
 \value{
 An object with values
@@ -58,6 +58,6 @@ The following methods are included: (1) Empirical Bayes: dynamic weight is deter
 }
 \examples{
 
-borrow.wt(Yc=40*0.312, nc=40, Ych=234*0.312, nch=234, nche=40, a0c=0.001, b0c=0.001, delta_threshold=0.1, eta=1)
+borrow.wt(Yc=40*0.3, nc=40, Ych=180*0.3, nch=180, nche=40, a0c=0.001, b0c=0.001, delta_threshold=0.1, eta=1)
 
 }

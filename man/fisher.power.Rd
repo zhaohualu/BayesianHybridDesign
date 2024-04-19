@@ -4,30 +4,22 @@
 \alias{fisher.power}
 \title{Power Calculation by Fisher's Exact Test}
 \usage{
-fisher.power(
-  pt = 0.512,
-  nt = 40,
-  pc = 0.312,
-  nc = 40,
-  alpha = 0.05,
-  nsim = 10000,
-  seed = 2023
-)
+fisher.power(pt, nt, pc, nc, alpha = 0.1, nsim = 10000, seed = 2000)
 }
 \arguments{
-\item{pt}{Probablity of success in experimental arm}
+\item{pt}{A scalar. Probablity of success in experimental arm}
 
-\item{nt}{Number of subject in experimental arm}
+\item{nt}{A scalar. Number of subject in experimental arm}
 
-\item{pc}{Probablity of success in control arm}
+\item{pc}{A scalar. Probablity of success in control arm}
 
-\item{nc}{Number of subject in control arm}
+\item{nc}{A scalar. Number of subject in control arm}
 
-\item{alpha}{Type I error (one-sided)}
+\item{alpha}{A scalar. One sided type I error rate.}
 
-\item{nsim}{Number of replications in simulation}
+\item{nsim}{A scalar. Number of replications to calculate power. Default 100,000.}
 
-\item{seed}{seed for simulation}
+\item{seed}{A scalar. seed for simulations. Default 2000.}
 }
 \value{
 power
@@ -37,6 +29,6 @@ This function calculates the power by simulations using Fisher's exact test.
 }
 \examples{
 
-fisher.power(pt = 0.512, nt = 40, pc = 0.312, nc = 40,nsim = 1000)
+fisher.power(pt = 0.5, nt = 40, pc = 0.3, nc = 40, nsim = 100000)
 
 }

@@ -4,14 +4,16 @@
 \alias{fisher}
 \title{Fishers Exact Test for Response Rate in Two arms}
 \usage{
-fisher(Yc = 12, nc = 40, Yt = 19, nt = 40, alternative = "greater")
+fisher(Yc, nc, Yt, nt, alternative = "greater")
 }
 \arguments{
-\item{r}{Number of reponses}
+\item{Yc}{A scalar. Number of subjects with response in experimental arm}
 
-\item{n}{Total number of subjects}
+\item{nc}{A scalar. Number of subjects in control arm}
 
-\item{conflev}{Confidence level}
+\item{Yt}{A scalar. Number of subjects with response  in control arm}
+
+\item{nt}{A scalar. Number of subjects in experimental arm}
 }
 \value{
 Fishers test object
