@@ -31,24 +31,24 @@
 #'  }
 #' @examples
 #'
-#' o = DPP.analysis(Yt=39, nt=60, Yc=13, nc=30, Ych=90, nch=200, nche = 30, 
+#' o = DPP.analysis(Yt=39, nt=60, Yc=13, nc=30, Ych=90, nch=200, nche = 30,
 #' a0c= 0.001, b0c= 0.001, a0t= 0.001, b0t= 0.001,
-#' delta_threshold = 0.1, method = "Empirical Bayes", 
+#' delta_threshold = 0.1, method = "Empirical Bayes",
 #' theta = 0.5, eta = 1)
-#' 
+#'
 #' @export
 #'
-DPP.analysis = function(Yt=39, nt=60, Yc=13, nc=30, 
-                        Ych=90, nch=200, nche = 30, 
+DPP.analysis = function(Yt=39, nt=60, Yc=13, nc=30,
+                        Ych=90, nch=200, nche = 30,
                         a0c= 0.001, b0c= 0.001,
                         a0t= 0.001, b0t= 0.001,
-                        delta_threshold = 0.1, method = "Empirical Bayes", 
+                        delta_threshold = 0.1, method = "Empirical Bayes",
                         theta = 0.5, eta = 1){
-  w = borrow.wt(Yc = Yc, nc = nc, Ych = Ych, 
-                nch = nch, nche = nche, a0c = a0c, b0c = b0c, 
-                delta_threshold = delta_threshold, method = method, 
+  w = borrow.wt(Yc = Yc, nc = nc, Ych = Ych,
+                nch = nch, nche = nche, a0c = a0c, b0c = b0c,
+                delta_threshold = delta_threshold, method = method,
                 theta = theta, eta = eta)$w
-  
+
   apost_c_trial = a0c + Yc
   bpost_c_trial = b0c + (nc - Yc)
   apost_c_hca = apost_c_trial + w * Ych
@@ -58,10 +58,10 @@ DPP.analysis = function(Yt=39, nt=60, Yc=13, nc=30,
   P_ORRt_upper_Times_p_ORRc = function(y, ac, bc, at, bt) {
     pbeta(y, at, bt, lower.tail = F) * dbeta(y, ac, bc)
   }
-  phat_pt_larger_pc = integrate(P_ORRt_upper_Times_p_ORRc, 
-                                lower = 1e-04, upper = 0.9999, ac = apost_c_hca, 
+  phat_pt_larger_pc = integrate(P_ORRt_upper_Times_p_ORRc,
+                                lower = 1e-04, upper = 0.9999, ac = apost_c_hca,
                                 bc = bpost_c_hca, at = apost_t, bt = bpost_t)$value
-  
+
   o = list()
   o$w = w
   o$phat_pt_larger_pc = phat_pt_larger_pc
@@ -71,6 +71,9 @@ DPP.analysis = function(Yt=39, nt=60, Yc=13, nc=30,
   o$bpost_c_hca = bpost_c_hca
   o$apost_t = apost_t
   o$bpost_t = bpost_t
-  
-  return(o)  
+  o$m.t = qbeta(0.5, apost_t, bpost_t)
+  o$m.c = qbeta(0.5, apost_c_trial, bpost_c_trial)
+  o$m.hca = qbeta(0.5, apost_c_hca, bpost_c_hca)
+
+  return(o)
 }
