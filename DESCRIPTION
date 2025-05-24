@@ -1,30 +1,12 @@
 Package: BayesianHybridDesign
-Title: Bayesian Hybrid Design and Analysis
-Version: 0.1
+Title: What the Package Does (One Line, Title Case)
+Version: 0.0.0.9000
 Authors@R: 
-    c(
-      person("Philip", "He", email =  "phe@dsi.com", role = c("aut", "cre")),
-      person("Zhaohua", "Lu", email = "zhaohua.lu@gmail.com", role = c("aut"))
-    )
-Description: This package performs the Bayesian hybrid design and analysis using dynamic power prior method. The design is applicable for primary endpoint of ORR with a historical control of the same patient population as the current trial. The historical control and the study control are incorported together to create the hybrid control.
+    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: What the package does (one paragraph).
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
     license
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.1 
-Depends: R (>= 4.1), RBesT, assertthat, checkmate, Metrics, ggplot2
-Imports:
-    foreach,
-	parallel,
-	doParallel
-Suggests: 
-    rmarkdown, 
-    knitr, 
-	testthat (>= 2.0.0), 
-	purrr,
-    rstanarm (>= 2.17.2), 
-	scales, 
-	tools, 
-	broom, 
-	tidyr
-VignetteBuilder: knitr
+RoxygenNote: 7.3.1
