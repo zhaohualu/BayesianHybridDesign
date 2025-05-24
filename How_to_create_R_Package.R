@@ -8,7 +8,7 @@ remove.packages("BayesianHybridDesign")
 devtools::create("C:\\External\\Bayesian Hybrid Design\\BayesianHybridDesign")
 devtools::document(pkg="C:\\External\\Bayesian Hybrid Design\\BayesianHybridDesign")
 
-devtools::install_github("phe9480\\BayesianHybridDesign")
+devtools::install_github("phe9480/BayesianHybridDesign")
 
 
 #------------------
