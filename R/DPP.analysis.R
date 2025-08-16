@@ -97,5 +97,5 @@ DPP.analysis <- function(Yt = 39, nt = 60, Yc = 13, nc = 30,
 
   return(o)
 }
-## GEMINI'S NOTE: There is a stray double-quote character at the end of your
-## file, which I have removed above. It would cause a file parsing error.
+
+
