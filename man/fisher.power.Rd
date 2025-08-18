@@ -4,7 +4,7 @@
 \alias{fisher.power}
 \title{Power Calculation by Fisher's Exact Test}
 \usage{
-fisher.power(pt, nt, pc, nc, alpha = 0.1, nsim = 10000, seed = 2000)
+fisher.power(pt, nt, pc, nc, alpha = 0.1, nsim = 10000, seed = NULL)
 }
 \arguments{
 \item{pt}{A scalar. Probablity of success in experimental arm}
@@ -17,18 +17,23 @@ fisher.power(pt, nt, pc, nc, alpha = 0.1, nsim = 10000, seed = 2000)
 
 \item{alpha}{A scalar. One sided type I error rate.}
 
-\item{nsim}{A scalar. Number of replications to calculate power. Default 100,000.}
+\item{nsim}{A scalar. Number of replications to calculate power. Default
+100,000.}
 
-\item{seed}{A scalar. seed for simulations. Default 2000.}
+\item{seed}{An integer. A seed for the random number generator to ensure
+reproducibility. Note: For best practice, it is recommended to call
+\code{set.seed()} outside of the function.}
 }
 \value{
-power
+A numeric scalar representing the calculated statistical power.
 }
 \description{
 This function calculates the power by simulations using Fisher's exact test.
 }
 \examples{
-
-fisher.power(pt = 0.5, nt = 40, pc = 0.3, nc = 40, nsim = 100000)
+\donttest{
+# nsim is reduced for a quick example run
+fisher.power(pt = 0.5, nt = 40, pc = 0.3, nc = 40, nsim = 1000, seed = 2000)
+}
 
 }

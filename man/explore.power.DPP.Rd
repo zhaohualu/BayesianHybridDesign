@@ -2,7 +2,7 @@
 % Please edit documentation in R/explore.power.DPP.R
 \name{explore.power.DPP}
 \alias{explore.power.DPP}
-\title{Power Calculation of Several power.DPP Function Parameters in Bayesian Hybrid Design}
+\title{Explore Power Across Multiple Scenarios for a Bayesian Hybrid Design}
 \usage{
 explore.power.DPP(
   method,
@@ -23,80 +23,109 @@ explore.power.DPP(
   theta = 0.5,
   eta = 1,
   nsim = 1e+05,
-  seed = 2000,
+  seed = NULL,
   ncore = NULL
 )
 }
 \arguments{
-\item{method}{A vector of methods for dynamic borrowing for exploration, supports "Empirical Bayes", "Bayesian p", "Generalized BC", "JSD"}
+\item{method}{A character vector. One or more dynamic borrowing methods to
+explore (e.g., \code{"Empirical Bayes"}, \code{"Bayesian p"}).}
 
-\item{pc}{A vector of response rate for study control arm for exploration}
+\item{pc}{A numeric vector. Response rates for the current control arm to
+explore.}
 
-\item{nc}{A vector of sample size for study control arm for exploration}
+\item{nc}{A numeric vector of integers. Sample sizes for the current control
+arm to explore.}
 
-\item{pc.calib}{A vector of response rate of study control arm for exploration. Each of these response rates is used for calibration such that the p-value equals to alpha (specified type I error) if pc = pc.calib}
+\item{pc.calib}{A numeric vector. Control arm response rates used for
+calibrating the type I error threshold, \code{tau}.}
 
-\item{q}{A vector of ratio of historical control arm and the study control arm for exploration.}
+\item{q}{A numeric vector. Ratios of \code{nche / nc} to explore.}
 
-\item{delta}{A scalar of difference between pt and pc to determine pt in each setting.}
+\item{delta}{A scalar numeric. The true difference to be added to \code{pc} to
+determine the experimental arm response rate (\code{pt}).}
 
-\item{r}{A scalar of  ratio of study experimental arm and study control arm  for exploration}
+\item{r}{A scalar numeric. The randomization ratio of the experimental arm to
+the control arm (\code{nt / nc}).}
 
-\item{pch}{A scalar of the response rate for historical control arm}
+\item{pch}{A scalar numeric. The response rate of the historical control arm.}
 
-\item{nch}{A scalar of the total number of patients in historical control}
+\item{nch}{A scalar integer. The total number of subjects in the historical
+control arm.}
 
-\item{alpha}{A scalar. One sided type I error rate.}
+\item{alpha}{A scalar numeric. The one-sided Type I error rate.}
 
-\item{a0c}{A scalar. Hyperprior for control response rate beta(a0c, b0c). Default 0.001.}
+\item{a0c, b0c}{Numerics. Hyperparameters for the Beta(a0c, b0c) prior on
+the control response rate. Defaults to 0.001.}
 
-\item{b0c}{A scalar. Hyperprior for control response rate beta(a0c, b0c). Default 0.001.}
+\item{a0t, b0t}{Numerics. Hyperparameters for the Beta(a0t, b0t) prior on
+the experimental response rate. Defaults to 0.001.}
 
-\item{a0t}{A scalar. Hyperprior for experimental response rate beta(a0t, b0t). Default 0.001.}
+\item{delta_threshold}{A scalar numeric. The similarity threshold; borrowing is
+only triggered if \code{abs(pc_hat - pch_hat) <= delta_threshold}. Default is 0.1.}
 
-\item{b0t}{A scalar. Hyperprior for experimental response rate beta(a0t, b0t). Default 0.001.}
+\item{theta}{A scalar numeric in (0, 1), applicable to the "Generalized BC"
+method. Default is 0.5.}
 
-\item{delta_threshold}{Borrow when abs(pc_hat (current study) - pch) <= delta_threshold#'. Default 0.1.}
+\item{eta}{A scalar numeric, applicable to the "Bayesian p", "Generalized
+BC", and "JSD" methods. Default is 1.}
 
-\item{theta}{A scalar parameter with a range of (0, 1), and applicable to method: "Generalized BC". Default 0.5.}
+\item{nsim}{A scalar integer. The number of Monte Carlo simulations for each
+scenario.}
 
-\item{eta}{A scalar parameter with a range of (0, infty), and applicable to method: "Bayesian p", "Generalized BC", "JSD". "Generalized BC" method requires two parameters theta and eta. Default 1.}
+\item{seed}{A scalar integer. A seed for the random number generator to ensure
+reproducibility. Default is NULL.}
 
-\item{nsim}{A scalar. Number of replications to calculate power. Default 100,000.}
-
-\item{seed}{A scalar. seed for simulations. Default 2000.}
-
-\item{ncore}{description}
+\item{ncore}{An integer. The number of CPU cores for parallel processing. If
+\code{NULL} (the default), it uses one less than the number of detected cores.}
 }
 \value{
-A dataframe containing the setting parameters and
-\itemize{
-\item type I error
-\item power
-\item delta boundary
-\item mean PMD
-\item sd(PMD)
+A \code{data.frame} where each row corresponds to one scenario from the
+input grid. The columns include the input parameters and the following
+results:
+\describe{
+\item{method}{The dynamic borrowing method used.}
+\item{nt, nc, nche}{Sample sizes for the experimental, current control, and
+effective historical control arms.}
+\item{pt, pc, pc.calib, pch}{Response rates used in the scenario.}
+\item{q}{The ratio of \code{nche / nc}.}
+\item{tau}{The calibrated threshold for statistical significance.}
+\item{type1err}{The simulated Type I error rate for the scenario.}
+\item{power}{The simulated statistical power for the scenario.}
+\item{delta.boundary}{The significance boundary for the difference between
+groups.}
+\item{mean.PMD}{The mean of the posterior mean difference over simulations.}
+\item{sd.PMD}{The standard deviation of the posterior mean difference.}
 }
 }
 \description{
-This function calculates the power and design parameters Bayesian Hybrid Design using
-parallel computing for efficiency. It is useful when there are multiple values of X
-parameters to explore. If only one setting to calculate, please use the power.DPP function.
-What is exploring, what parameters allow vectors for exploration.
+Evaluates statistical power and other design parameters across a grid of
+specified settings, using parallel computing for efficiency.
+}
+\details{
+This function serves as a wrapper for \code{power.DPP()}. It uses \code{expand.grid()}
+to create a full factorial design from the vector-based input parameters
+(\code{method}, \code{pc}, \code{nc}, \code{pc.calib}, \code{q}). It then iterates through each
+scenario to calculate the power, type I error, and other metrics.
 }
 \examples{
+\donttest{
+# Run with 2 cores as an example; on CRAN, examples should use <= 2 cores.
+Res1 <- explore.power.DPP(method=c("Empirical Bayes"),
+                          pc=c(0.27, 0.37),
+                          nc=23:25,
+                          pc.calib = 0.27,
+                          q = c(1, 1.5),
+                          delta = 0.2,
+                          r = 1,
+                          pch=0.27, nch=500,
+                          alpha=0.1,
+                          nsim = 200, # Reduced for a quick example
+                          seed=1000,
+                          ncore=2)
+}
 
-Res1 = explore.power.DPP(method=c("Empirical Bayes"),
-pc=c(0.17,0.27,0.37),
-nc=23:33,
-pc.calib = 0.27,
-q = c(1,1.5,2),
-pch=0.27, nch=500,
-alpha=0.1,
-a0c=0.001, b0c=0.001, a0t=0.001, b0t=0.001,
-delta_threshold=0.1,
-theta=0.5, eta=1,
-nsim = 1000, seed=2000,
-ncore=16)
-
+}
+\seealso{
+\code{\link{power.DPP}} for the underlying single-scenario calculation.
 }

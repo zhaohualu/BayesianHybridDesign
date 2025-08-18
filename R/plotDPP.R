@@ -17,6 +17,8 @@
 #' plotDPP(DPP = o)
 #' }
 #'
+#' @importFrom stats dbeta
+#' @importFrom graphics plot lines polygon legend
 #' @export
 plotDPP <- function(DPP) {
   ### plot the posterior density curves

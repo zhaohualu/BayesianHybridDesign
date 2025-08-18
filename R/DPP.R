@@ -58,9 +58,6 @@
 #'     based on study control for nsim replications.
 #' }
 #'
-#' ## GEMINI'S NOTE: The nsim value in this example is too high for CRAN checks,
-#' ## which require examples to run quickly. This will likely cause a NOTE or
-#' ## WARNING during R CMD check. See revision instruction #1 below.
 #' @examples
 #' \donttest{
 #' o <- DPP(pt = 0.5, pc = 0.3, pch = 0.3, pc.calib = 0.3, nch = 200, nc.range = NULL,
@@ -68,7 +65,7 @@
 #'          delta_threshold = 0.1,
 #'          method = "Empirical Bayes", theta = 0.5, eta = 1,
 #'          a0c = 0.001, b0c = 0.001, a0t = 0.001, b0t = 0.001,
-#'          nsim = 200, seed = 2000)
+#'          nsim = 1000, seed = 2000)
 #' print(o)
 #' }
 #' @export

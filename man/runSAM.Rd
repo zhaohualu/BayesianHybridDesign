@@ -169,6 +169,7 @@ characteristics of SAM priors for continuous endpoints.
 
 }}
 \examples{
+\donttest{
 set.seed(123)
 ## Example of a binary endpoint
 ## Consider a randomized comparative trial designed to borrow information
@@ -226,6 +227,7 @@ prior.se   <- sigma/sqrt(100)
 ##              theta.t  = c(0.1, 1.0),
 ##              sigma = sigma)
 ## OC
+}
 
 }
 \references{

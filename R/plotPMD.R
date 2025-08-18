@@ -33,6 +33,8 @@
 #' stats2 <- plotPMD(o=o1a, o2=o1b)
 #' }
 #'
+#' @importFrom stats density quantile
+#' @importFrom graphics plot lines polygon legend
 #' @export
 #'
 plotPMD <- function(o, o2 = NULL) {

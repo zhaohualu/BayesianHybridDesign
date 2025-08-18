@@ -81,26 +81,27 @@
 #' @seealso \code{\link{SAM_weight}}
 #'
 #' @examples
+#' \donttest{
 #' set.seed(123)
 #' ## Examples for binary endpoints
 #' ## Suppose that the informative prior constructed based on historical data is
 #' ## beta(40, 60)
-#' prior.historical <- mixbeta(c(1, 40, 60))
+#' prior.historical <- RBesT::mixbeta(c(1, 40, 60))
 #' ## Data of the control arm
-#' data.control     <- rbinom(60, size = 1, prob = 0.42)
+#' data.control     <- stats::rbinom(60, size = 1, prob = 0.42)
 #' ## Calculate the mixture weight of the SAM prior
 #' wSAM <- SAM_weight(if.prior = prior.historical,
-#'                    delta = 0.15,        ## Clinically significant difference
+#'                    delta = 0.15,      ## Clinically significant difference
 #'                    data = data.control  ## Control arm data
 #'                    )
 #' ## Assume beta(1,1) as the non-informative prior used for mixture
-#' nf.prior  <- mixbeta(nf.prior = c(1,1,1))
+#' nf.prior  <- RBesT::mixbeta(nf.prior = c(1,1,1))
 #' ## Generate the SAM prior
 #' SAM.prior <- SAM_prior(if.prior = prior.historical, ## Informative prior
 #'                        nf.prior = nf.prior,         ## Non-informative prior
 #'                        weight = wSAM                ## Mixture weight of the SAM prior
 #'                        )
-#' plot(SAM.prior)
+#' graphics::plot(SAM.prior)
 #'
 #' ## Examples for continuous endpoints
 #' ## Suppose that the informative prior constructed based on historical data is
@@ -108,25 +109,26 @@
 #' sigma      <- 3
 #' prior.mean <- 0
 #' prior.se   <- sigma/sqrt(100)
-#' prior.historical <- mixnorm(c(1, prior.mean, prior.se), sigma = sigma)
+#' prior.historical <- RBesT::mixnorm(c(1, prior.mean, prior.se), sigma = sigma)
 #' ## Data of the control arm
-#' data.control <- rnorm(80, mean = 0, sd = sigma)
+#' data.control <- stats::rnorm(80, mean = 0, sd = sigma)
 #' ## Calculate the mixture weight of the SAM prior
 #' wSAM <- SAM_weight(if.prior = prior.historical,
-#'                    delta = 0.2 * sigma,    ## Clinically significant difference
+#'                    delta = 0.2 * sigma,   ## Clinically significant difference
 #'                    data = data.control     ## Control arm data
 #'                    )
 #' ## Assume unit-information prior N(0,3) as the non-informative prior used
 #' ## for the mixture
-#' nf.prior         <- mixnorm(nf.prior = c(1,prior.mean, sigma),
-#'                             sigma = sigma)
+#' nf.prior         <- RBesT::mixnorm(nf.prior = c(1,prior.mean, sigma),
+#'                                    sigma = sigma)
 #' ## Generate the SAM prior
 #' SAM.prior <- SAM_prior(if.prior = prior.historical, ## Informative prior
 #'                        nf.prior = nf.prior,         ## Non-informative prior
 #'                        weight = wSAM                ## Mixture weight of the SAM prior
 #'                        )
-#' plot(SAM.prior)
+#' graphics::plot(SAM.prior)
 #'
+#'}
 #' @import Metrics
 #' @import RBesT
 #' @import assertthat

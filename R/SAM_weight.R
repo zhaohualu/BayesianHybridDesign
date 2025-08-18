@@ -81,118 +81,46 @@
 #' https://doi.org/10.1111/biom.13927
 #'
 #' @examples
+#' \donttest{
 #' set.seed(123)
 #' ## Examples for binary endpoints
 #' ## Example 1: no prior-data conflict
-#' ## Suppose that the informative prior constructed based on historical data is
-#' ## beta(40, 60)
-#' prior.historical <- mixbeta(c(1, 40, 60))
+#' ## Suppose that the informative prior is beta(40, 60)
+#' prior.historical <- RBesT::mixbeta(c(1, 40, 60))
 #' ## Data of control arm
-#' data.control     <- rbinom(60, size = 1, prob = 0.42)
+#' data.control     <- stats::rbinom(60, size = 1, prob = 0.42)
 #' ## Calculate the mixture weight of the SAM prior
 #' wSAM <- SAM_weight(if.prior = prior.historical,
-#'                    delta = 0.15,        ## Clinically significant difference
+#'                    delta = 0.15,      ## Clinically significant difference
 #'                    data = data.control  ## Control arm data
 #'                    )
 #' print(wSAM)
 #'
-#' ## Example 2: in the presence of prior-data conflict, where the current data
-#' ## has 12 responses in 60 patients
+#' ## Example 2: with prior-data conflict (12 responses in 60 patients)
 #' wSAM <- SAM_weight(if.prior = prior.historical,
-#'                    delta = 0.15,    ## Clinically significant difference
-#'                    ## Methods to determine mixture weight for the SAM priors
-#'                    ## by Posterior Probability Ratio
+#'                    delta = 0.15,
 #'                    method.w = 'PPR',
-#'                    ## Prior odds of favoring no prior-data conflicts to
-#'                    ## the presence of prior-data conflict
-#'                    prior.odd = 1/9,
-#'                    n = 60,          ## Number of patients in the control arm
-#'                    r = 12           ## Number of responses in the control arm
-#'                    )
-#' print(wSAM)
-#'
-#' ## Example 3: in the presence of prior-data conflict, where the current data
-#' ## has 12 responses in 60 patients
-#' wSAM <- SAM_weight(if.prior = prior.historical,
-#'                    delta = 0.15, ## Clinically significant difference
-#'                    n = 60,       ## Number of patients in the control arm
-#'                    r = 12        ## Number of responses in the control arm
+#'                    prior.odds = 1/9,
+#'                    n = 60,
+#'                    r = 12
 #'                    )
 #' print(wSAM)
 #'
 #' ## Examples for continuous endpoints
 #' ## Example 1: no prior-data conflict
-#' ## Suppose that the informative prior constructed from historical data is
-#' ## N(0, 3)
+#' ## Suppose the informative prior is N(0, 3)
 #' sigma      <- 3
 #' prior.mean <- 0
 #' prior.se   <- sigma/sqrt(100)
-#' prior.historical <- mixnorm(c(1, prior.mean, prior.se), sigma = sigma)
+#' prior.historical <- RBesT::mixnorm(c(1, prior.mean, prior.se), sigma = sigma)
 #' ## Data of the control arm
-#' data.control     <- rnorm(80, mean = 0, sd = sigma)
+#' data.control <- stats::rnorm(80, mean = 0, sd = sigma)
 #' wSAM <- SAM_weight(if.prior = prior.historical,
-#'                    delta = 0.3 * sigma,    ## Clinically significant difference
-#'                    data = data.control     ## Control arm data
+#'                    delta = 0.3 * sigma,
+#'                    data = data.control
 #'                    )
 #' print(wSAM)
-#'
-#' ## Example 2: in the presence of prior-data conflict, where the current data
-#' ## has mean of 0.5
-#' data.control     <- rnorm(80, mean = 1, sd = sigma)
-#' wSAM  <- SAM_weight(if.prior = prior.historical,
-#'                     delta = 0.3 * sigma,    ## Clinically significant difference
-#'                     data = data.control     ## Control arm data
-#'                     )
-#' print(wSAM)
-#'
-#' ## Examples for survival endpoints
-#' ## Example 1: no prior-data conflict
-#' ## Suppose the survival times from historical data follows exp(1) distribution
-#' ## with random censoring time follows U(0.5, 5) distribution
-#' T_hi <- rexp(100, rate = 1)
-#' C_hi <- runif(100, min = 0.5, max = 5)
-#' ## Indicators of the uncensored events
-#' delta_hi <- as.numeric(T_hi < C_hi)
-#' ## Observed survival times from historical data
-#' U_hi     <- T_hi
-#' U_hi[delta_hi == 0] <- C_hi[delta_hi == 0]
-#' ## Construct the informative prior based on simulated historical data
-#' prior.historical <- mixgamma(c(1, sum(delta_hi), sum(U_hi)),
-#'                              param = 'ab', likelihood = 'exp')
-#' ## Suppose the survival times from control data follows exp(0.95) distribution
-#' ## with random censoring time follows U(0.5, 5) distribution
-#' T_ci <- rexp(100, rate = 0.95)
-#' C_ci <- runif(100, min = 0.5, max = 5)
-#' ## Indicators of the uncensored events
-#' delta_ci <- as.numeric(T_ci < C_ci)
-#' ## Observed survival times from control data
-#' U_ci     <- T_ci
-#' U_ci[delta_ci == 0] <- C_ci[delta_ci == 0]
-#' ## Data of the control arm
-#' data.control     <- rbind(sum(delta_ci), sum(U_ci))
-#' wSAM <- SAM_weight(if.prior = prior.historical,
-#'                    delta = 0.2,            ## Clinically significant difference
-#'                    data = data.control     ## Control arm data
-#'                    )
-#' print(wSAM)
-#'
-#' ## Example 2: in the presence of prior-data conflict, where the current survival
-#' ## times follows exp(2) distribution with random censoring time follows U(0.5, 5)
-#' ## distribution
-#' T_ci <- rexp(100, rate = 2)
-#' C_ci <- runif(100, min = 0.5, max = 5)
-#' ## Indicators of the uncensored events
-#' delta_ci <- as.numeric(T_ci < C_ci)
-#' ## Observed survival times from control data
-#' U_ci     <- T_ci
-#' U_ci[delta_ci == 0] <- C_ci[delta_ci == 0]
-#' ## Data of the control arm
-#' data.control     <- rbind(sum(delta_ci), sum(U_ci))
-#' wSAM  <- SAM_weight(if.prior = prior.historical,
-#'                     delta = 0.2,            ## Clinically significant difference
-#'                     data = data.control     ## Control arm data
-#'                     )
-#' print(wSAM)
+#'}
 #'
 #' @import Metrics
 #' @import RBesT

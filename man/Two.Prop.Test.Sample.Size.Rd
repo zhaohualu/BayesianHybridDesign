@@ -2,33 +2,38 @@
 % Please edit documentation in R/Two.Prop.Test.Sample.Size.R
 \name{Two.Prop.Test.Sample.Size}
 \alias{Two.Prop.Test.Sample.Size}
-\title{Sample Size Calibration for Two-Sample Proportions}
+\title{Sample Size for Comparing Two Proportions}
 \usage{
 Two.Prop.Test.Sample.Size(p1, p2, alpha, beta, r)
 }
 \arguments{
-\item{p1}{Arm 1 proportion (control)}
+\item{p1}{A scalar. The anticipated proportion in Arm 1 (e.g., control).}
 
-\item{p2}{Arm 2 proportion (experimental)}
+\item{p2}{A scalar. The anticipated proportion in Arm 2 (e.g., experimental).}
 
-\item{alpha}{Type I error rate (one-sided)}
+\item{alpha}{A scalar. The one-sided Type I error rate.}
 
-\item{beta}{type II error rate (1-power)}
+\item{beta}{A scalar. The Type II error rate (1 - power).}
 
-\item{r}{Ratio of Arm 2 (experimental) vs Arm 1 (control)}
+\item{r}{A scalar. The randomization ratio of Arm 2 to Arm 1 ($n_2/n_1$).}
 }
 \value{
-sample size for arm 1 (control) and total
+A numeric vector of length two:
+\itemize{
+\item The required sample size for Arm 1 ($n_1$).
+\item The total required sample size ($n_1 + n_2$).
+}
 }
 \description{
-This function calculates the sample size for comparing two-sample proportions
-https://www2.ccrb.cuhk.edu.hk/stat/proportion/Casagrande.htm
-}
-\details{
-p1,p2,alpha,beta,r
+Calculates the required sample size for a two-group comparison of
+proportions based on the method of Casagrande, Pike, and Smith (1978).
 }
 \examples{
+\donttest{
+Two.Prop.Test.Sample.Size(p1=0.27, p2=0.47, alpha = 0.10, beta=0.2, r=2)
+}
 
-Two.Prop.Test.Sample.Size (p1=0.27, p2=0.47, alpha = 0.10, beta=0.2, r=2)
-
+}
+\seealso{
+\url{https://www2.ccrb.cuhk.edu.hk/stat/proportion/Casagrande.htm}
 }

@@ -49,7 +49,7 @@
 #' @examples
 #' \donttest{
 #' o <- power.DPP(pt=0.5, nt=40, pc=0.3, nc=40, pc.calib = 0.3, pch=0.3,
-#'                nche=40, nch=180, alpha=0.1, nsim = 10000, seed=2000) # nsim is reduced
+#'                nche=40, nch=180, alpha=0.1, nsim = 1000, seed=2000) # nsim is reduced
 #' }
 #' @export
 #'

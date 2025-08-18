@@ -2,27 +2,38 @@
 % Please edit documentation in R/fisher.R
 \name{fisher}
 \alias{fisher}
-\title{Fishers Exact Test for Response Rate in Two arms}
+\title{Fisher's Exact Test for a 2x2 Contingency Table}
 \usage{
 fisher(Yc, nc, Yt, nt, alternative = "greater")
 }
 \arguments{
-\item{Yc}{A scalar. Number of subjects with response in experimental arm}
+\item{Yc}{A scalar integer. The number of subjects with a response in the
+control arm.}
 
-\item{nc}{A scalar. Number of subjects in control arm}
+\item{nc}{A scalar integer. The total number of subjects in the control arm.}
 
-\item{Yt}{A scalar. Number of subjects with response  in control arm}
+\item{Yt}{A scalar integer. The number of subjects with a response in the
+experimental (treatment) arm.}
 
-\item{nt}{A scalar. Number of subjects in experimental arm}
+\item{nt}{A scalar integer. The total number of subjects in the
+experimental arm.}
+
+\item{alternative}{A character string specifying the alternative hypothesis.
+Must be one of "two.sided" (default), "greater" or "less".}
 }
 \value{
-Fishers test object
+An object of class \code{htest} as returned by \code{stats::fisher.test}.
 }
 \description{
-This function performs Fishers exact test customized for comparing response rate for two arms.
+A wrapper for \code{stats::fisher.test} to conveniently compare response rates
+between two arms (experimental and control).
 }
 \examples{
-
+\donttest{
 fisher(Yc=12, nc=40, Yt=19, nt=40)
+}
 
+}
+\seealso{
+\code{\link[stats]{fisher.test}}
 }

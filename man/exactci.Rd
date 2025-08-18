@@ -2,25 +2,29 @@
 % Please edit documentation in R/exactci.R
 \name{exactci}
 \alias{exactci}
-\title{Clopper-Pearson Exact Confidence Interval}
+\title{Clopper-Pearson Exact Confidence Interval for a Binomial Proportion}
 \usage{
 exactci(r, n, conflev)
 }
 \arguments{
-\item{r}{Number of reponses}
+\item{r}{A scalar integer. The number of successes or responses.}
 
-\item{n}{Total number of subjects}
+\item{n}{A scalar integer. The total number of trials or subjects.}
 
-\item{conflev}{Confidence level. Always two-sided.}
+\item{conflev}{A scalar numeric. The desired confidence level (e.g., 0.95
+for a 95\% CI).}
 }
 \value{
-Clopper-Pearson CI
+A numeric vector of length two containing the lower and upper
+confidence limits.
 }
 \description{
-This function calculates the Clopper-Pearson exact confidence interval
+Calculates the two-sided Clopper-Pearson exact confidence interval for a
+binomial proportion.
 }
 \examples{
-
-exactci (r=4, n=20, conflev=0.95)
+\donttest{
+exactci(r=4, n=20, conflev=0.95)
+}
 
 }

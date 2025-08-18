@@ -18,7 +18,7 @@
 #' @examples
 #' \donttest{
 #' # nsim is reduced for a quick example run
-#' fisher.power(pt = 0.5, nt = 40, pc = 0.3, nc = 40, nsim = 200, seed = 2000)
+#' fisher.power(pt = 0.5, nt = 40, pc = 0.3, nc = 40, nsim = 1000, seed = 2000)
 #' }
 #'
 #' @export
@@ -29,7 +29,7 @@ fisher.power <- function(pt, nt, pc, nc, alpha = 0.1,
     set.seed(seed)
   }
   sig <- 0
-  
+
   for (i in 1:nsim) {
     Yc <- rbinom(1, size = nc, prob = pc)
     Yt <- rbinom(1, size = nt, prob = pt)

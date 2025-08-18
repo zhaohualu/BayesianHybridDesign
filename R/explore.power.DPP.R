@@ -77,7 +77,7 @@
 #'                           pch=0.27, nch=500,
 #'                           alpha=0.1,
 #'                           nsim = 200, # Reduced for a quick example
-#'                           seed=2000,
+#'                           seed=1000,
 #'                           ncore=2)
 #' }
 #'
@@ -110,7 +110,7 @@ explore.power.DPP <- function(method,
   if (is.null(ncore)) {
     ncore <- max(1, parallel::detectCores() - 1)
   }
-  
+
   cl <- makeCluster(ncore)
   registerDoParallel(cl)
   on.exit(stopCluster(cl), add = TRUE) # This ensures cleanup
@@ -120,6 +120,8 @@ explore.power.DPP <- function(method,
 
   Settings$nt <- Settings$nc * r
   Settings$nche <- round(Settings$nc * Settings$q)
+
+  i <- NULL
 
   # Loop over all settgins with parallel computing
   NS <- nrow(Settings)

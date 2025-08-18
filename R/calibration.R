@@ -46,7 +46,7 @@
 #'                      a0c=0.001, b0c=0.001, a0t=0.001, b0t=0.001,
 #'                      delta_threshold=0.1,
 #'                      method="Empirical Bayes", theta=0.5, eta=1,
-#'                      nsim = 10000, seed=2000) # nsim reduced for quick example
+#'                      nsim = 1000, seed=2000) # nsim reduced for quick example
 #' }
 #'
 #' @export
@@ -68,7 +68,7 @@ calibration <- function(nt, pc.calib, nc,
     set.seed(seed)
   }
   pt_larger_pc <- rep(NA, nsim)
-  
+
   Ych <- round(nch * pch)
 
   for (i in 1:nsim) {
@@ -112,7 +112,7 @@ calibration <- function(nt, pc.calib, nc,
                                  at = apost_t,
                                  bt = bpost_t)$value
   }
-  
+
   tau <- quantile(pt_larger_pc, 1 - alpha, type = 3)
 
   return(as.numeric(tau))
