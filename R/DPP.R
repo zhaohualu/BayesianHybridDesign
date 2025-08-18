@@ -36,7 +36,7 @@
 #'   Default 0.001.
 #' @param nsim A scalar. Number of replications to calculate power. Default
 #'   100,000.
-#' @param seed A scalar. seed for simulations. Default 2000.
+#' @param seed A scalar. seed for simulations. Default NULL.
 #'
 #' @return An object with values
 #' \itemize{
@@ -78,7 +78,7 @@ DPP <- function(pt, pc, pch, pc.calib, nch, nc.range = NULL,
                 delta_threshold = 0.1,
                 method = "Empirical Bayes", theta = 0.5, eta = 1,
                 a0c = 0.001, b0c = 0.001, a0t = 0.001, b0t = 0.001,
-                nsim = 100000, seed = 2000) {
+                nsim = 100000, seed = NULL) {
 
   # Range of search
   if (is.null(nc.range)) {
@@ -146,3 +146,4 @@ DPP <- function(pt, pc, pch, pc.calib, nch, nc.range = NULL,
   }
   return(ans)
 }
+
