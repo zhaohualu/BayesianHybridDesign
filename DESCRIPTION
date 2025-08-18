@@ -6,6 +6,7 @@ Authors@R:
       person("Philip", "He", email = "philipyihe2018@gmail.com", role = c("aut")),
       person("Zhaohua", "Lu", email = "zhaohua.lu@gmail.com", role = c("aut", "cre"))
     )
+Maintainer: Zhaohua Lu <zhaohua.lu@gmail.com>
 Description: Implements Bayesian hybrid designs that incorporate historical
     control data into a current clinical trial. The package uses a dynamic
     power prior method to determine the degree of borrowing from the historical
