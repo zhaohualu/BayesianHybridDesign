@@ -13,4 +13,5 @@ RoxygenNote: 7.3.1
 Imports:
     Metrics,
     dplyr,
-    tibble
+    tibble,
+    RBesT
