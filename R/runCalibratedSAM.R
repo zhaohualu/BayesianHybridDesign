@@ -76,6 +76,8 @@
 #'
 #' @seealso \code{\link{runSAM}}, \code{\link{gMAP}}, \code{\link{automixfit}}
 #'
+#' @export
+#'
 #' @examples
 #' \dontrun{
 #' # This example assumes the functions 'runSAM', 'gMAP', 'automixfit',
