@@ -91,7 +91,7 @@ and robust MAP prior.}
 \item{n.t}{Sample size for the treatment arm.}
 
 \item{decision}{Decision rule to compare the treatment with the control;
-see \code{\link{decision2S}}.}
+see \code{\link[RBesT]{decision2S}}.}
 
 \item{ntrial}{Number of trials simulated.}
 
@@ -157,7 +157,7 @@ the MES of using a non-informative prior.
 
 To evaluate type I error and power, the determination of whether the
 treatment is superior to the control is calculated based on function
-\code{\link{decision2S}}.
+\code{\link[RBesT]{decision2S}}.
 }
 \section{Methods (by class)}{
 \itemize{
@@ -169,6 +169,7 @@ characteristics of SAM priors for continuous endpoints.
 
 }}
 \examples{
+\donttest{
 set.seed(123)
 ## Example of a binary endpoint
 ## Consider a randomized comparative trial designed to borrow information
@@ -226,6 +227,7 @@ prior.se   <- sigma/sqrt(100)
 ##              theta.t  = c(0.1, 1.0),
 ##              sigma = sigma)
 ## OC
+}
 
 }
 \references{

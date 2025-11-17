@@ -2,7 +2,7 @@
 % Please edit documentation in R/power.DPP.R
 \name{power.DPP}
 \alias{power.DPP}
-\title{Bayesian Hybrid Design}
+\title{Power Calculation for Bayesian Hybrid Design}
 \usage{
 power.DPP(
   pt,
@@ -26,68 +26,75 @@ power.DPP(
   datamat = NULL,
   w0 = NULL,
   nsim = 1e+05,
-  seed = 2000
+  seed = NULL
 )
 }
 \arguments{
-\item{pt}{response rate for experimental arm in current study}
+\item{pt, pc}{Numerics. The response rates for the experimental and control
+arms, respectively.}
 
-\item{nt}{number of patients in experimental arm in current study}
+\item{nt, nc}{Integers. The sample sizes for the experimental and control
+arms, respectively.}
 
-\item{pc}{Response rate for control arm in current study}
+\item{pc.calib}{A scalar numeric. The control response rate assumed for
+calibrating the type I error threshold, \code{tau}. Often \code{pc.calib = pch}.}
 
-\item{nc}{number of patients in control arm in current study}
+\item{pch, nch}{Numeric and integer. The response rate and sample size of the
+historical control arm.}
 
-\item{pc.calib}{Required for calibration if tau is not provided. Response rate for control arm in current study for calibration. Usually, pc.calib = pch.}
+\item{nche}{An integer. The effective number of subjects to be borrowed,
+used for calculating the global borrowing weight.}
 
-\item{pch}{Response rate for control treatment in historical study}
+\item{alpha}{A scalar numeric. The one-sided Type I error rate, used for
+calibration if \code{tau} is not provided.}
 
-\item{nche}{Equivalent number of patients borrowed from historical study}
+\item{tau}{(Optional) A scalar numeric. The pre-calibrated threshold for
+statistical significance. If \code{NULL}, it will be calculated internally.}
 
-\item{nch}{Total number of patients in historical control}
+\item{a0c, b0c, a0t, b0t}{Numerics. Hyperparameters for the Beta priors on the
+response rates.}
 
-\item{alpha}{A scalar. One sided type I error rate. Required for calibration if tau is not provided.}
+\item{delta_threshold}{A scalar numeric. The similarity threshold for borrowing.}
 
-\item{tau}{Calibrated threshold for statistical significance. If tau is not provided, it will be calculated by calibration to type I error alpha.}
+\item{method}{A string specifying the dynamic borrowing method.}
 
-\item{a0c}{Hyperprior for control response rate beta(a0c, b0c)}
+\item{theta, eta}{Numerics. Additional parameters for certain borrowing methods.}
 
-\item{b0c}{Hyperprior for control response rate beta(a0c, b0c)}
+\item{datamat}{(Optional) A matrix with \code{nsim} rows and 2 columns
+(experimental, control) of pre-simulated response counts.}
 
-\item{a0t}{Hyperprior for experimental response rate beta(a0t, b0t)}
+\item{w0}{(Optional) A scalar numeric. A fixed borrowing weight to override
+the dynamic calculation.}
 
-\item{b0t}{Hyperprior for experimental response rate beta(a0t, b0t)}
+\item{nsim}{An integer. The number of simulations to run.}
 
-\item{delta_threshold}{Borrow when abs(pc_hat (current study) - pch) <= delta_threshold}
-
-\item{method}{Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Generalized BC", "JSD"}
-
-\item{theta}{A parameter with a range of (0, 1), and applicable to method: "Generalized BC".}
-
-\item{eta}{A parameter with a range of (0, infty), and applicable to method: "Bayesian p", "Generalized BC", "JSD". "Generalized BC" method requires two parameters theta and eta.}
-
-\item{datamat}{A matrix with dimension nsim * 2 containing the pre-simulated data for the study treatment (1st column) and control  (1st column) groups, respectively. If not supplied, binomial random Monte Carlo samples will be generated in the function.}
-
-\item{w0}{prior power parameters w. If not specified (default), w_d is calculated by the specified method for dynamic borrowing.}
-
-\item{nsim}{Number of replications to calculate power}
-
-\item{seed=2000}{seed for simulations}
+\item{seed}{An integer. A seed for the random number generator. Default NULL.}
 }
 \value{
-An object with values
-\itemize{
-\item power study power
-\item delta.bound Minimum detectable difference of response rate in the current study using hybrid design
-\item pc.PMD Posterior mean difference between hybrid control and concurrent control
-\item pc.sd  sd of PMD
+A large list containing the power, the calibrated \code{tau}, all input
+parameters, and detailed simulation results such as:
+\describe{
+\item{power}{The calculated statistical power.}
+\item{tau}{The calibrated significance threshold.}
+\item{pc.PMD, pc.sd.PMD}{The mean and standard deviation of the posterior
+mean difference between the hybrid and concurrent controls.}
+\item{delta.bound}{The minimum detectable difference in response rates.}
+\item{phat_pt_larger_pc_all}{A vector of posterior probabilities
+\code{P(pt > pc | data)} for each of the \code{nsim} simulations.}
+\item{mean_hca, mean_c}{Vectors of the posterior means for the hybrid
+and concurrent control arms for each simulation.}
+\item{simulated.data}{A matrix of the simulated response counts used.}
+\item{w}{A vector of the final borrowing weights used in each simulation.}
+\item{...}{and all input parameters.}
 }
 }
 \description{
-This function calculates the power and design parameters Bayesian Hybrid Design using dynamic power prior approach.
+Calculates statistical power and other design parameters for a Bayesian
+Hybrid Design using a dynamic power prior approach, based on simulations.
 }
 \examples{
-
-o=power.DPP(pt=0.5, nt=40,pc=0.3,nc=40, pc.calib = 0.3, pch=0.3,nche=40,nch=180, alpha=0.1,a0c=0.001,b0c=0.001,a0t=0.001,b0t=0.001,delta_threshold=0.1)
-
+\donttest{
+o <- power.DPP(pt=0.5, nt=40, pc=0.3, nc=40, pc.calib = 0.3, pch=0.3,
+               nche=40, nch=180, alpha=0.1, nsim = 1000, seed=2000) # nsim is reduced
+}
 }

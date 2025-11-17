@@ -2,7 +2,7 @@
 % Please edit documentation in R/borrow.wt.R
 \name{borrow.wt}
 \alias{borrow.wt}
-\title{Borrowing weights from historical study}
+\title{Calculate Borrowing Weights from Historical Data}
 \usage{
 borrow.wt(
   Yc,
@@ -19,45 +19,62 @@ borrow.wt(
 )
 }
 \arguments{
-\item{Yc}{A scalar number of responders for control arm in current study}
+\item{Yc}{A scalar integer. The number of responders in the current control arm.}
 
-\item{nc}{A scalar number of patients in control arm in current study}
+\item{nc}{A scalar integer. The number of subjects in the current control arm.}
 
-\item{Ych}{A scalar number of responders for control treatment in historical study}
+\item{Ych}{A scalar integer. The number of responders in the historical control arm.}
 
-\item{nch}{A scalar total number of patients in historical control}
+\item{nch}{A scalar integer. The number of subjects in the historical control arm.}
 
-\item{nche}{A scalar for the equivalent number of patients borrowed from historical study}
+\item{nche}{A scalar. The maximum number of subjects that can be borrowed,
+used to calculate the global weight \code{a}.}
 
-\item{a0c}{The 1st scale hyperprior hyperparameter for control response rate beta(a0c, b0c). Default 0.001.}
+\item{a0c, b0c}{Numerics. Hyperparameters for the Beta(a0c, b0c) prior on
+the control response rate. Default to 0.001.}
 
-\item{b0c}{The 2nd hyperprior hyperparameter for control response rate beta(a0c, b0c). Default 0.001.}
+\item{delta_threshold}{A numeric threshold. Borrowing is only triggered if the
+absolute difference in observed response rates is less than this value.
+Default is 0.1.}
 
-\item{delta_threshold}{A scale threshold parameter. Only if abs(pc (current study) - pch) <= delta_threshold, we borrow from historical control. Default 0.1.}
+\item{method}{A string specifying the dynamic borrowing method. Options
+include "Empirical Bayes", "Bayesian p", "Generalized BC", "JSD".}
 
-\item{method}{A string characters. Method for dynamic borrowing, "Empirical Bayes", "Bayesian p", "Generalized BC", "JSD"}
+\item{theta}{A numeric scalar in (0, 1), applicable to the "Generalized BC"
+method. Default is 0.5.}
 
-\item{theta}{A scalar parameter with a range of (0, 1), and applicable to "Generalized BC". Default 0.5.}
-
-\item{eta}{A scalar parameter with a range of (0, infty), and applicable to methods "Bayesian p", "Generalized BC", "JSD". Default 1.}
+\item{eta}{A numeric scalar, applicable to the "Bayesian p", "Generalized
+BC", and "JSD" methods. Default is 1.}
 }
 \value{
-An object with values
+A list containing three values:
 \itemize{
-\item a Global borrowing weight
-\item wd Dynamic borrowing weight according to similarly of response rate
-\item w Overall borrowing weight
+\item a: The global borrowing weight, calculated as nche / nch.
+\item wd: The dynamic borrowing weight, calculated based on the chosen method.
+\item w: The final overall borrowing weight, which is a product of \code{a},
+\code{wd}, and an indicator for whether the response rates are sufficiently similar.
 }
 }
 \description{
-This function calculates the borrowing weights for the hybrid control from historical study.
-The following methods are included: (1) Empirical Bayes: dynamic weight is determined by maximizing marginal distribution;
-(2) Bayesian P value: similarity measured by Bayesian P value comparing two distributions;
-(3) Generalized Bhattacharyya Coefficient (BC): Bhattacharyya coefficient is a special case for theta = 0.5.
-(4) Jensen-Shannon divergence (JSD): a measurement of similarity for two distributions.
+Calculates borrowing weights for a hybrid control arm using one of several
+dynamic borrowing methods.
+}
+\details{
+The function implements the following methods:
+\itemize{
+\item{"Empirical Bayes"}: The weight is determined by maximizing the
+marginal likelihood of the current data.
+\item{"Bayesian p"}: Similarity is measured by a Bayesian p-value
+comparing the posterior distributions.
+\item{"Generalized BC"}: Uses the Generalized Bhattacharyya Coefficient.
+The standard BC is a special case with theta = 0.5.
+\item{"JSD"}: Uses the Jensen-Shannon Divergence to measure similarity.
+}
 }
 \examples{
-
-borrow.wt(Yc=40*0.3, nc=40, Ych=180*0.3, nch=180, nche=40, a0c=0.001, b0c=0.001, delta_threshold=0.1, eta=1)
+\donttest{
+borrow.wt(Yc=12, nc=40, Ych=54, nch=180, nche=40, a0c=0.001,
+b0c=0.001, delta_threshold=0.1, eta=1)
+}
 
 }

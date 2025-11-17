@@ -2,36 +2,41 @@
 % Please edit documentation in R/fisher.bound.R
 \name{fisher.bound}
 \alias{fisher.bound}
-\title{Rejection boundary by Fisher's exact test}
+\title{Calculate Rejection Boundary for Fisher's Exact Test}
 \usage{
 fisher.bound(pc, nc, nt, alpha = 0.1)
 }
 \arguments{
-\item{pc}{response rate for control arm}
+\item{pc}{A scalar numeric. The response rate for the control arm.}
 
-\item{nc}{number of patients in control arm}
+\item{nc}{A scalar integer. The number of subjects in the control arm.}
 
-\item{nt}{number of patients in experimental arm}
+\item{nt}{A scalar integer. The number of subjects in the experimental arm.}
 
-\item{alpha}{p-value threshold for significance. Alpha must be one-sided. Default 0.1.}
+\item{alpha}{A scalar numeric. The one-sided p-value threshold for
+statistical significance. Default is 0.1.}
 }
 \value{
-An object with values
-\itemize{
-\item M A 2-by-2 contingency table for response and treatment group
-\item p p-value when the response rates just across the boundary
-\item rc number of responders for control arm, determined by the response rate and sample size
-\item nc sample size in control arm
-\item rt response rate for experimental arm just acros the boundary
-\item nt sample size in experimental arm
-\item delta Minimum detectable difference of response rate between two groups
+A list containing the following components:
+\describe{
+\item{M}{The 2x2 contingency table at the boundary.}
+\item{p}{The p-value corresponding to the boundary.}
+\item{rc}{The number of responders in the control arm, calculated as \code{round(nc * pc)}.}
+\item{nc}{The sample size of the control arm.}
+\item{rt}{The smallest number of responders in the experimental arm that
+achieves a p-value <= \code{alpha}.}
+\item{nt}{The sample size of the experimental arm.}
+\item{delta}{The minimum detectable difference in response rates (\code{rt/nt - rc/nc}).}
 }
 }
 \description{
-This function calculates the minimum detectable difference in response rate when using Fisher's exact test.
+For a given control group response rate and sample sizes, this function
+finds the smallest number of responders in the experimental arm (\code{rt}) that
+achieves statistical significance based on a one-sided Fisher's exact test.
 }
 \examples{
-
-fisher.bound(pc=0.3,nc=40,nt=40,alpha=0.1)
+\donttest{
+fisher.bound(pc=0.3, nc=40, nt=40, alpha=0.1)
+}
 
 }

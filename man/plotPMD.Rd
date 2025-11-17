@@ -2,34 +2,45 @@
 % Please edit documentation in R/plotPMD.R
 \name{plotPMD}
 \alias{plotPMD}
-\title{Plot of Posterior Mean Difference (PMD) Object produced by power.DPP() function.}
+\title{Plot Posterior Mean Difference (PMD) Distributions}
 \usage{
 plotPMD(o, o2 = NULL)
 }
 \arguments{
-\item{o}{Object produced by power.DPP() function.}
+\item{o}{An object produced by the \code{power.DPP()} function.}
 
-\item{o2}{Second object produced by power.DPP() function. Default NULL.}
+\item{o2}{(Optional) A second object from \code{power.DPP()} to compare on the
+same plot. Default is \code{NULL}.}
 }
 \value{
-An object with values
+Invisibly returns a list containing summary statistics. The
+structure of the list depends on whether \code{o2} is provided.
 \itemize{
-\item mean_PMD Mean of Posterior Mean Difference (PMD), calculated by the simulations.
-\item sd_PMD Standard Deviation of Posterior Mean Difference (PMD), calculated by the simulations.
-\item CI95_PMD 95 percent credible interval for PMD, calculated by the simulations.
+\item{If \code{o2} is \code{NULL}}: A list with a scalar \code{mean_PMD}, a scalar
+\code{sd_PMD}, and a numeric vector \code{CI95_PMD}.
+\item{If \code{o2} is provided}: A list with numeric vectors for \code{mean_PMD}
+and \code{sd_PMD}, and a matrix for \code{CI95_PMD}, with each row
+corresponding to an input object.
 }
 }
 \description{
-Plot the distribution of posterior mean difference (PMD) by simulations.
-}
-\details{
-This function Perform Analysis for a Study Using Bayesian Hybrid Design using Dynamic Power Prior Framework.
+Plots the density of the posterior mean difference between the hybrid and
+concurrent control arms, based on an object from \code{power.DPP()}. Can
+compare one or two such objects on the same plot.
 }
 \examples{
+\donttest{
+# nsim reduced for faster example
+o1a <- power.DPP(pt=0.65, nt=60, pc=0.45, nc=30, pc.calib=0.45,
+                 pch=0.45, nche=60, nch=200, alpha=0.1, nsim=1000)
+o1b <- power.DPP(pt=0.65, nt=60, pc=0.45, nc=30, pc.calib=0.45,
+                 pch=0.45, nche=30, nch=200, alpha=0.1, nsim=1000)
 
-o1a=power.DPP(pt=0.65, nt=60,pc=0.45,nc=30, pc.calib = 0.45, pch=0.45,nche=60,nch=200, alpha=0.1,a0c=0.001,b0c=0.001,a0t=0.001,b0t=0.001,delta_threshold=0.1, nsim=1000)
-o1b=power.DPP(pt=0.65, nt=60,pc=0.45,nc=30, pc.calib = 0.45, pch=0.45,nche=30,nch=200, alpha=0.1,a0c=0.001,b0c=0.001,a0t=0.001,b0t=0.001,delta_threshold=0.1, nsim=1000)
-plotPMD(o=o1a, o2=o1b) #perfect
-plotPMD(o=o1a) #perfect
+# Plot a single object
+stats1 <- plotPMD(o=o1a)
+
+# Plot two objects for comparison
+stats2 <- plotPMD(o=o1a, o2=o1b)
+}
 
 }

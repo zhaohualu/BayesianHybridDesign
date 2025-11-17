@@ -2,26 +2,27 @@
 % Please edit documentation in R/plotDPP.R
 \name{plotDPP}
 \alias{plotDPP}
-\title{Plot of DPP Object produced by DPP.analysis() function.}
+\title{Plot a DPP Object}
 \usage{
 plotDPP(DPP)
 }
 \arguments{
-\item{DPP}{DPP object produced by DPP.analysis() function.}
+\item{DPP}{An object produced by the \code{DPP.analysis()} function.}
 }
 \description{
-Plot the posterior distributions of OR in control arm and experimental arm. DPP object produced by DPP.analysis() function.
-}
-\details{
-This function Perform Analysis for a Study Using Bayesian Hybrid Design using Dynamic Power Prior Framework.
+Plots the posterior distributions of the response rates for the control
+and experimental arms from a \code{DPP} object created by the
+\code{DPP.analysis()} function.
 }
 \examples{
+\donttest{
+o <- DPP.analysis(Yt=39, nt=60, Yc=13, nc=30, Ych=90, nch=200, nche = 30,
+                  a0c= 0.001, b0c= 0.001, a0t= 0.001, b0t= 0.001,
+                  delta_threshold = 0.1, method = "Empirical Bayes",
+                  theta = 0.5, eta = 1)
 
-o = DPP.analysis(Yt=39, nt=60, Yc=13, nc=30, Ych=90, nch=200, nche = 30,
-a0c= 0.001, b0c= 0.001, a0t= 0.001, b0t= 0.001,
-delta_threshold = 0.1, method = "Empirical Bayes",
-theta = 0.5, eta = 1)
-
-plot.DPP(DPP=o)
+# Call the function using its defined name 'plotDPP'
+plotDPP(DPP = o)
+}
 
 }
