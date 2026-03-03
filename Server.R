@@ -41,39 +41,141 @@ tryCatch({
 })
 
 # ===========================================================================
-# NEW: Credible Difference Calculation Functions
+# Minimal Detectable Difference Calculation Functions
 # ===========================================================================
 
-calculate_credible_difference <- function(dpp_results, confidence_level = 0.95) {
-  if (is.null(dpp_results$phat_pt_larger_pc_all)) {
+calculate_minimal_detectable_difference <- function(dpp_results, input_params = NULL) {
+  # The power.DPP function returns delta.bound which is the minimum detectable difference
+  # We should use this directly if available
+
+  if (is.null(dpp_results)) {
     return(NA)
   }
 
-  # Calculate the critical value from the posterior distribution
-  # This finds the value where (1 - confidence_level) of simulations exceed
-  critical_value <- quantile(dpp_results$phat_pt_larger_pc_all, probs = confidence_level)
+  # First, try to use delta.bound from power.DPP results
+  if (!is.null(dpp_results$delta.bound) && !is.na(dpp_results$delta.bound)) {
+    return(dpp_results$delta.bound)
+  }
 
-  return(critical_value)
-}
+  # If delta.bound is not available, calculate it manually
+  # This should match the logic used in power.DPP
 
-calculate_orr_critical_value <- function(dpp_results, confidence_level = 0.95) {
-  if (is.null(dpp_results$mean_hca) || is.null(dpp_results$mean_c)) {
+  # Get tau threshold
+  tau <- dpp_results$tau
+  if (is.null(tau) || is.na(tau)) {
     return(NA)
   }
 
-  # Calculate ORR differences: experimental vs hybrid control
-  orr_differences <- dpp_results$mean_hca - dpp_results$mean_c
+  # Get input parameters if available
+  if (is.null(input_params)) {
+    return(NA)
+  }
 
-  # Find the critical value for statistical significance
-  critical_value <- quantile(orr_differences, probs = (1 - confidence_level))
+  # Extract parameters
+  nt <- input_params$nt
+  nc <- input_params$nc
+  pc_hat <- input_params$pc  # Control arm response rate for calibration
+  a0c <- input_params$a0c
+  b0c <- input_params$b0c
+  a0t <- input_params$a0t
+  b0t <- input_params$b0t
+  pch <- input_params$pch
+  nche <- input_params$nche
+  nch <- input_params$nch
+  method <- input_params$method
+  delta_threshold <- input_params$delta_threshold
 
-  return(critical_value)
+  # Get theta and eta if applicable
+  theta <- input_params$theta
+  eta <- input_params$eta
+
+  # Calculate Yc from the control response rate (used for calibration)
+  Yc <- round(pc_hat * nc)
+
+  # Calculate Ych (historical responders)
+  Ych <- round(pch * nch)
+
+  # Use DPP.analysis to calculate the borrowing weight
+  # This ensures we use the exact same calculation as the package
+  tryCatch({
+    analysis_args <- list(
+      Yt = 0,  # Placeholder, will iterate
+      nt = nt,
+      Yc = Yc,
+      nc = nc,
+      Ych = Ych,
+      nch = nch,
+      nche = nche,
+      a0c = a0c,
+      b0c = b0c,
+      a0t = a0t,
+      b0t = b0t,
+      delta_threshold = delta_threshold,
+      method = method
+    )
+
+    # Add theta and eta if applicable
+    if (method == "Generalized BC") {
+      analysis_args$theta <- theta
+      analysis_args$eta <- eta
+    } else if (method %in% c("Bayesian p", "JSD")) {
+      analysis_args$eta <- eta
+    }
+
+    # Iterate through possible values of Yt to find the minimum detectable difference
+    min_diff <- NA
+
+    for (Yt in 0:nt) {
+      pt_hat <- Yt / nt
+
+      # Update Yt in analysis
+      analysis_args$Yt <- Yt
+
+      # Call DPP.analysis to get posterior probability
+      dpp_analysis <- do.call(BayesianHybridDesign::DPP.analysis, analysis_args)
+      prob_pt_greater <- dpp_analysis$phat_pt_larger_pc
+
+      # Check if this satisfies the MDD criterion
+      if (prob_pt_greater > tau) {
+        # Also check that Yt - 1 does NOT satisfy the criterion
+        if (Yt > 0) {
+          analysis_args$Yt <- Yt - 1
+          dpp_analysis_minus <- do.call(BayesianHybridDesign::DPP.analysis, analysis_args)
+          prob_pt_greater_minus <- dpp_analysis_minus$phat_pt_larger_pc
+
+          if (prob_pt_greater_minus <= tau) {
+            # This is the minimal detectable difference!
+            min_diff <- pt_hat - pc_hat
+            break
+          }
+        } else {
+          # Yt = 0 already satisfies, so MDD is at Yt = 0
+          min_diff <- pt_hat - pc_hat
+          break
+        }
+      }
+    }
+
+    return(min_diff)
+
+  }, error = function(e) {
+    # If DPP.analysis fails, return NA
+    warning("MDD calculation failed: ", e$message)
+    return(NA)
+  })
 }
+
+#Minimal Detectable Difference
+
+# ===========================================================================
+# REMOVED: calculate_orr_critical_value function - NOT USED CORRECTLY
+# The value 0.9999 is NOT a credible difference, it's the posterior probability threshold
+# ===========================================================================
 
 shinyServer(function(input, output, session) {
 
   # ===========================================================================
-  # Term Definitions (keeping existing definitions)
+  # Term Definitions
   # ===========================================================================
 
   dpp_term_definitions <- list(
@@ -152,7 +254,7 @@ shinyServer(function(input, output, session) {
   )
 
   # ===========================================================================
-  # Observe Events for Term Definitions (keeping existing)
+  # Observe Events for Term Definitions
   # ===========================================================================
 
   observeEvent(input$term_pt, { output$definition_output <- renderUI(HTML(dpp_term_definitions[["pt"]])) })
@@ -222,7 +324,7 @@ shinyServer(function(input, output, session) {
 
 
   # ===========================================================================
-  # Conditional UI (keeping existing)
+  # Conditional UI
   # ===========================================================================
 
   output$theta_ui <- renderUI({
@@ -250,11 +352,12 @@ shinyServer(function(input, output, session) {
   })
 
   # ===========================================================================
-  # Dynamic Power Prior (DPP) Study Design
+  # Dynamic Power Prior (DPP) Study Design - CORRECTED
   # ===========================================================================
 
   dpp_results <- reactiveVal(NULL)
   dpp_pmd_stats <- reactiveVal(NULL)
+  dpp_input_params <- reactiveVal(NULL)  # Store input parameters for MDD calculation
 
   observeEvent(input$run_dpp, {
     shinyjs::html("analysis_status_message", "")
@@ -267,11 +370,8 @@ shinyServer(function(input, output, session) {
     if (is.null(input$nt) || input$nt <= 0 || is.null(input$nc) || input$nc <= 0 || is.null(input$nch) || input$nch <= 0 || is.null(input$nche) || input$nche <= 0) {
       errors <- c(errors, "Sample sizes (nt, nc, nch, nche) must be positive integers.")
     }
-    if (!is.null(input$nche) && input$nche > 50) {
-      errors <- c(errors, "Maximum Number of Patients from Historical Study (nche) cannot be greater than 50.")
-    }
-    if (is.null(input$alpha) || input$alpha <= 0 || input$alpha > 1) errors <- c(errors, "Type I Error (alpha) must be between 0 and 1.")
     if (!is.null(input$nche) && !is.null(input$nch) && input$nche > input$nch) errors <- c(errors, "Equivalent number of patients borrowed (nche) cannot exceed total historical control patients (nch).")
+    if (is.null(input$alpha) || input$alpha <= 0 || input$alpha > 1) errors <- c(errors, "Type I Error (alpha) must be between 0 and 1.")
     if (is.null(input$delta_threshold) || input$delta_threshold < 0 || input$delta_threshold > 1) errors <- c(errors, "Delta Threshold must be between 0 and 1.")
 
     if (input$method == "Generalized BC" && (is.null(input$theta) || input$theta <= 0 || input$theta >= 1)) {
@@ -282,8 +382,10 @@ shinyServer(function(input, output, session) {
     }
 
     seed_val <- suppressWarnings(as.integer(input$seed))
-    if (is.na(seed_val) || seed_val < 1) {
-      errors <- c(errors, "Seed must be a positive integer.")
+    if (is.na(seed_val)) {
+      seed_val <- NULL  # Allow NULL seed
+    } else if (seed_val < 1) {
+      errors <- c(errors, "Seed must be a positive integer or empty.")
     }
 
     if (length(errors) > 0) {
@@ -294,15 +396,16 @@ shinyServer(function(input, output, session) {
     shinyjs::html("analysis_status_message", "<p style='color: blue;'>Calculation started. Please wait...</p>")
     shinyjs::disable("run_dpp")
 
+    # CORRECTED: Use power.DPP() function with correct parameters
     power.DPP_args <- list(
       pt = input$pt,
-      nt = input$nt,
+      nt = as.integer(input$nt),
       pc = input$pc,
-      nc = input$nc,
+      nc = as.integer(input$nc),
       pc.calib = input$p_calib,
       pch = input$pch,
-      nche = input$nche,
-      nch = input$nch,
+      nche = as.integer(input$nche),
+      nch = as.integer(input$nch),
       alpha = input$alpha,
       a0c = input$a0c,
       b0c = input$b0c,
@@ -310,9 +413,14 @@ shinyServer(function(input, output, session) {
       b0t = input$b0t,
       delta_threshold = input$delta_threshold,
       method = input$method,
-      nsim = input$nsim,
-      seed = seed_val
+      nsim = as.integer(input$nsim)
     )
+
+    # Only add seed if it's valid
+    if (!is.null(seed_val) && seed_val > 0) {
+      power.DPP_args$seed = seed_val
+    }
+
     if (input$method == "Generalized BC") {
       power.DPP_args$theta = input$theta
       power.DPP_args$eta = input$eta
@@ -327,11 +435,38 @@ shinyServer(function(input, output, session) {
 
     then(p, onFulfilled = function(result) {
       dpp_results(result)
+      # Store input parameters for MDD calculation
+      params_list <- list(
+        nt = as.integer(input$nt),
+        nc = as.integer(input$nc),
+        pc = input$pc,
+        a0c = input$a0c,
+        b0c = input$b0c,
+        a0t = input$a0t,
+        b0t = input$b0t,
+        pch = input$pch,
+        nche = as.integer(input$nche),
+        nch = as.integer(input$nch),
+        method = input$method,
+        delta_threshold = input$delta_threshold
+      )
+
+      # Add theta and eta if applicable
+      if (input$method == "Generalized BC") {
+        params_list$theta <- input$theta
+        params_list$eta <- input$eta
+      } else if (input$method %in% c("Bayesian p", "JSD")) {
+        params_list$eta <- input$eta
+      }
+
+      dpp_input_params(params_list)
+
       shinyjs::html("analysis_status_message", "<p style='color: green;'>Study Design calculation ran successfully!</p>")
       shinyjs::enable("run_dpp")
     }, onRejected = function(e) {
       shinyjs::html("analysis_status_message", paste0("<p style='color: red;'>Study Design calculation failed: ", e$message, ". Please check inputs and try again.</p>"))
       dpp_results(NULL)
+      dpp_input_params(NULL)
       shinyjs::enable("run_dpp")
     })
   })
@@ -346,12 +481,13 @@ shinyServer(function(input, output, session) {
     cat(round(dpp_results()$tau, 4))
   })
 
-  # UPDATED: Credible Difference (Statistical Critical Value)
-  output$dppDeltaBound <- renderPrint({
+  # Minimal Detectable Difference
+  output$dppMinimalDetectableDifference <- renderPrint({
     req(dpp_results())
-    credible_diff <- calculate_credible_difference(dpp_results())
-    if (!is.na(credible_diff)) {
-      cat(round(credible_diff, 4))
+    req(dpp_input_params())
+    mdd <- calculate_minimal_detectable_difference(dpp_results(), dpp_input_params())
+    if (!is.na(mdd)) {
+      cat(round(mdd, 4))
     } else {
       cat("N/A")
     }
@@ -379,28 +515,31 @@ shinyServer(function(input, output, session) {
     )
   })
 
-  # UPDATED: Credible Difference Box
-  output$dppDeltaBoundBox <- renderValueBox({
+  # Minimal Detectable Difference Box
+  output$dppMinimalDetectableDifferenceBox <- renderValueBox({
     req(dpp_results())
-    credible_diff <- calculate_credible_difference(dpp_results())
-    if (!is.na(credible_diff)) {
+    req(dpp_input_params())
+    mdd <- calculate_minimal_detectable_difference(dpp_results(), dpp_input_params())
+    if (!is.na(mdd)) {
       valueBox(
-        value = round(credible_diff, 4),
-        subtitle = "Credible Difference (Critical Value)",
+        value = round(mdd, 4),
+        subtitle = "Minimal Detectable Difference",
         icon = icon("arrows-alt-h"),
         color = "green"
       )
     } else {
       valueBox(
         value = "N/A",
-        subtitle = "Credible Difference",
+        subtitle = "Minimal Detectable Difference",
         icon = icon("exclamation-triangle"),
         color = "red"
       )
     }
   })
 
-
+  # ===========================================================================
+  # REMOVED: Credible Difference Box - This was incorrectly showing the posterior probability threshold
+  # ===========================================================================
 
   # PMD Statistics outputs
   output$dpp_pmd_mean <- renderText({
@@ -419,7 +558,7 @@ shinyServer(function(input, output, session) {
     sprintf("[%.4f, %.4f]", ci[1], ci[2])
   })
 
-  # Updated PMD Plot using the proper plotPMD function
+  # PMD Plot using the proper plotPMD function
   output$dpp_plot_pmd <- renderPlot({
     req(dpp_results())
 
@@ -437,7 +576,7 @@ shinyServer(function(input, output, session) {
   })
 
   # ===========================================================================
-  # DPP Table 2 Analysis - Compare Different Borrowing Amounts
+  # DPP Design Optimization Analysis - CORRECTED
   # ===========================================================================
 
   dpp_table_results <- reactiveVal(NULL)
@@ -463,17 +602,17 @@ shinyServer(function(input, output, session) {
 
     pc_values <- as.numeric(unlist(strsplit(input$table_pc_values, ",")))
     nche_values <- as.numeric(unlist(strsplit(input$table_nche_values, ",")))
-    table_nt <- input$table_nt
-    table_nc <- input$table_nc
+    table_nt <- as.integer(input$table_nt)
+    table_nc <- as.integer(input$table_nc)
     table_pch <- input$table_pch
-    table_nch <- input$table_nch
+    table_nch <- as.integer(input$table_nch)
     table_delta_threshold <- input$table_delta_threshold
     table_alpha <- input$table_alpha
     table_a0c <- input$table_a0c
     table_b0c <- input$table_b0c
     table_a0t <- input$table_a0t
     table_b0t <- input$table_b0t
-    table_nsim <- input$table_nsim
+    table_nsim <- as.integer(input$table_nsim)
 
     p <- future({
       ns <- length(pc_values)
@@ -500,14 +639,15 @@ shinyServer(function(input, output, session) {
       # Run simulations for each combination
       for(s in 1:ns){
         for(m in 1:nm){
-          # Calibration
-          cs <- s
-          datamat_typeI <- cbind(xt_typeI_list[[cs]], xc_list[[cs]])
+          # CORRECTED: Use power.DPP() for both calibration and analysis
 
-          tau <- BayesianHybridDesign::calibration(
+          # For Type I error analysis
+          TypeI <- BayesianHybridDesign::power.DPP(
+            pt = pc_values[s],
             nt = table_nt,
-            pc.calib = pc_values[cs],
+            pc = pc_values[s],
             nc = table_nc,
+            pc.calib = pc_values[s],  # Use same pc for calibration
             pch = table_pch,
             nche = nche_values[m],
             nch = table_nch,
@@ -518,29 +658,6 @@ shinyServer(function(input, output, session) {
             b0t = table_b0t,
             delta_threshold = table_delta_threshold,
             method = "Empirical Bayes",
-            datamat = datamat_typeI,
-            nsim = table_nsim,
-            seed = 2000
-          )
-
-          # Type I error
-          TypeI <- BayesianHybridDesign::power.DPP(
-            pt = pc_values[s],
-            nt = table_nt,
-            pc = pc_values[s],
-            nc = table_nc,
-            pc.calib = pc_values[cs],
-            pch = table_pch,
-            nche = nche_values[m],
-            nch = table_nch,
-            tau = tau,
-            a0c = table_a0c,
-            b0c = table_b0c,
-            a0t = table_a0t,
-            b0t = table_b0t,
-            delta_threshold = table_delta_threshold,
-            method = "Empirical Bayes",
-            datamat = datamat_typeI,
             nsim = table_nsim,
             seed = 2000
           )
@@ -549,26 +666,23 @@ shinyServer(function(input, output, session) {
           pc_mi_DPP[s, m] <- TypeI$pc.PMD
           pc_sdi_DPP[s, m] <- TypeI$pc.sd.PMD
 
-          # Power
-          datamat_Power <- cbind(xt_list[[s]], xc_list[[s]])
-
+          # For Power analysis (pt = pc + 0.2)
           Power <- BayesianHybridDesign::power.DPP(
             pt = pc_values[s] + 0.2,
             nt = table_nt,
             pc = pc_values[s],
             nc = table_nc,
-            pc.calib = pc_values[cs],
+            pc.calib = pc_values[s],  # Use same pc for calibration
             pch = table_pch,
             nche = nche_values[m],
             nch = table_nch,
-            tau = tau,
+            alpha = table_alpha,
             a0c = table_a0c,
             b0c = table_b0c,
             a0t = table_a0t,
             b0t = table_b0t,
             delta_threshold = table_delta_threshold,
             method = "Empirical Bayes",
-            datamat = datamat_Power,
             nsim = table_nsim,
             seed = 2000
           )
@@ -589,10 +703,10 @@ shinyServer(function(input, output, session) {
 
     then(p, onFulfilled = function(result) {
       dpp_table_results(result)
-      shinyjs::html("dpp_table_status_message", "<p style='color: green;'>Table analysis completed successfully!</p>")
+      shinyjs::html("dpp_table_status_message", "<p style='color: green;'>Design optimization analysis completed successfully!</p>")
       shinyjs::enable("run_dpp_table")
     }, onRejected = function(e) {
-      shinyjs::html("dpp_table_status_message", paste0("<p style='color: red;'>Table analysis failed: ", e$message, "</p>"))
+      shinyjs::html("dpp_table_status_message", paste0("<p style='color: red;'>Design optimization analysis failed: ", e$message, "</p>"))
       dpp_table_results(NULL)
       shinyjs::enable("run_dpp_table")
     })
@@ -639,7 +753,7 @@ shinyServer(function(input, output, session) {
   })
 
   # ===========================================================================
-  # Dynamic Power Prior (DPP) Analysis
+  # Dynamic Power Prior (DPP) Analysis - This section is CORRECT
   # ===========================================================================
 
   dpp_analysis_results <- reactiveVal(NULL)
@@ -1257,12 +1371,12 @@ shinyServer(function(input, output, session) {
       output$fisherBoundNt <- renderPrint({ bound_result$nt })
       output$fisherBoundDelta <- renderPrint({ round(bound_result$delta, 4) })
 
-      shinyjs::html("fisher_bound_status_message", "<p style='color: green;'>Fisher Bound calculation ran successfully!</p>")
+      shinyjs::html("fisher_bound_status_message", "<p style='color: green;'>Fisher Boundary calculation ran successfully!</p>")
 
       output$fisherBoundConclusion <- renderUI({
         HTML(
           "<h4>Summary</h4>
-          <p>The Fisher Bound analysis determined that a minimum of <strong>", bound_result$M, "</strong> responders in the treatment arm are required to achieve statistical significance. This corresponds to a minimum detectable difference of <strong>", round(bound_result$delta, 4), "</strong> and a p-value of <strong>", round(bound_result$p, 4), "</strong> at the boundary.</p>"
+          <p>The Fisher Boundary analysis determined that a minimum of <strong>", bound_result$M, "</strong> responders in the treatment arm are required to achieve statistical significance. This corresponds to a minimum detectable difference of <strong>", round(bound_result$delta, 4), "</strong> and a p-value of <strong>", round(bound_result$p, 4), "</strong> at the boundary.</p>"
         )
       })
 
@@ -1281,7 +1395,7 @@ shinyServer(function(input, output, session) {
       output$fisherBoundRt <- renderPrint(NULL)
       output$fisherBoundNt <- renderPrint(NULL)
       output$fisherBoundDelta <- renderPrint(NULL)
-      shinyjs::html("fisher_bound_status_message", paste0("<p style='color: red;'>Fisher Bound calculation failed: ", e$message, ". Please check inputs and try again.</p>"))
+      shinyjs::html("fisher_bound_status_message", paste0("<p style='color: red;'>Fisher Boundary calculation failed: ", e$message, ". Please check inputs and try again.</p>"))
     }, finally = {
       shinyjs::enable("run_fisher_bound")
     })
