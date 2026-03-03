@@ -21,7 +21,7 @@ shinyUI(
     # Header
     dashboardHeader(
       title = tags$div(
-        tags$img(src = "https://i.ibb.co/yFzV7v9r/IDSWG-logo.png", height = "50px", style = "margin-right: 10px;"),
+        tags$img(src = "https://i.postimg.cc/59rbFS2r/design1.png", height = "30px", style = "margin-right: 10px;"),
         "Bayesian Hybrid Design"
       ),
       titleWidth = 350
@@ -35,8 +35,8 @@ shinyUI(
         menuItem("Home", tabName = "home", icon = icon("home")),
         menuItem("Dynamic Power Prior (DPP)", icon = icon("chart-line"),
                  menuSubItem("Library", tabName = "dpp_library", icon = icon("book")),
-                 menuSubItem("Single Design", tabName = "dpp_design", icon = icon("calculator")),
-                 menuSubItem("Comparative Analysis", tabName = "dpp_table", icon = icon("table")),
+                 menuSubItem("Study Design", tabName = "dpp_design", icon = icon("calculator")),
+                 menuSubItem("Design Optimization", tabName = "dpp_table", icon = icon("table")),
                  menuSubItem("Statistical Analysis", tabName = "dpp_analysis", icon = icon("microscope"))
         ),
         menuItem("SAM Prior", icon = icon("layer-group"),
@@ -47,7 +47,7 @@ shinyUI(
         menuItem("Fisher's Exact", icon = icon("dice"),
                  menuSubItem("Library", tabName = "fisher_library", icon = icon("book")),
                  menuSubItem("Power Analysis", tabName = "fisher_power", icon = icon("bolt")),
-                 menuSubItem("Bound Analysis", tabName = "fisher_bound", icon = icon("border-all"))
+                 menuSubItem("Rejection Boundary", tabName = "fisher_bound", icon = icon("border-all"))
         )
       )
     ),
@@ -280,7 +280,7 @@ shinyUI(
                                     style = "filter: drop-shadow(0 4px 6px rgba(0,0,0,0.3)); margin-bottom: 25px;"),
                            h1(strong("Bayesian Hybrid Design"),
                               style = "font-size: 3.5em; margin-bottom: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);"),
-                           h3("An R Shiny App for Bayesian Hybrid Design and Analysis",
+                           h3("A Comprehensive R Shiny App for Clinical Study Design and Analysis",
                               style = "font-weight: 300; margin-bottom: 15px; opacity: 0.95; font-size: 1.5em;"),
                            p("Accelerating drug development through intelligent data integration",
                              style = "font-size: 1.1em; opacity: 0.9; margin-top: 20px;")
@@ -299,7 +299,7 @@ shinyUI(
                          "In the pharmaceutical industry, developing a new drug is a high-cost, long-term process. For example, the average cost to develop a cancer drug is approximately ",
                          strong("$1.2 billion"), ", and the timeline from initial laboratory research to patient use can exceed ",
                          strong("10 years"), "."),
-                       p(style = "font-size: 1.15em; color: #555; line-height: 1.9; margin-bottom: 20px;",
+                       p(style = "font-size: 1.15em; color: #555; line-height = 1.9; margin-bottom: 20px;",
                          "To accelerate this process, one promising approach is the ",
                          strong("hybrid design method"),
                          ". This method allows for the appropriate incorporation of external data into a current study, which enhances go/no-go decision-making for the next phases of development."),
@@ -424,7 +424,7 @@ shinyUI(
                          column(3,
                                 div(style = "text-align: center;",
                                     div(style = "background: white;
-                                         width: 90px;
+                                         width = 90px;
                                          height: 90px;
                                          border-radius: 50%;
                                          margin: 0 auto 25px;
@@ -499,8 +499,8 @@ shinyUI(
             ),
             column(4,
                    div(style = "text-align: center; padding: 40px; background: white; border-radius: 10px; margin: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);",
-                       h1("Potential Time Savings", style = "color: #f093fb; margin-bottom: 15px; font-size: 3.5em; font-weight: 700;"),
-                       p("Enhanced Statistical Inference", style = "color: #666; font-size: 1.2em;")
+                       h1("30-50%", style = "color: #f093fb; margin-bottom: 15px; font-size: 3.5em; font-weight: 700;"),
+                       p("Potential time savings", style = "color: #666; font-size: 1.2em;")
                    )
             )
           ),
@@ -521,10 +521,9 @@ shinyUI(
                          "Lu Z, Toso J, Ayele G, He P. A Bayesian Hybrid Design With Borrowing From Historical Study. Pharm Stat. 2025 Mar-Apr;24(2):e2466. doi: 10.1002/pst.2466. Epub 2024 Dec 27. PMID: 39731333.",
                          style = "color: #667eea; text-decoration: none; font-size: 1.1em;"
                        )),
-                       h4(icon("users"), " App Developer and Maintainer:",
-                          style = "color: #667eea; margin-bottom: 20px; font-size: 1.4em;"),
-                       p("Tanvi Mane, tm1049-AT-scarletmail.rutgers.edu. The App was created under IDSWG Oncology WG (https://oncologytrialdesign.org/). MIT License"),
-                       hr(style = "border-color: #e0e0e0; margin: 25px 0;")
+                       hr(style = "border-color: #e0e0e0; margin: 25px 0;"),
+                       p(icon("users"), em(" This app's design and code were developed with the assistance of Tanvi Mane."),
+                         style = "color: #999; margin-bottom: 0; font-size: 1.05em;")
                    )
             )
           )
@@ -602,7 +601,7 @@ shinyUI(
           tabName = "dpp_design",
 
           div(class = "content-header",
-              h1(icon("calculator"), " Single Study Design - Dynamic Power Prior"),
+              h1(icon("calculator"), " Study Design - Dynamic Power Prior"),
               p("Configure your study parameters below to calculate power, tau, and other design metrics.",
                 style = "color: #666; font-size: 1.1em; margin-top: 10px;")
           ),
@@ -690,14 +689,29 @@ shinyUI(
           ),
 
           # ===========================================================================
-          # RESULTS SECTION - UPDATED WITH BOTH METRICS
+          # RESULTS SECTION
           # ===========================================================================
 
-          # Key Metrics Value Boxes
+          # Key Metrics Value Boxes - 3 BOXES: Power (blue), Tau (pink/yellow), MDD (green)
           fluidRow(
             column(4, valueBoxOutput("dppPowerBox", width = NULL)),
             column(4, valueBoxOutput("dppTauBox", width = NULL)),
-            column(4, valueBoxOutput("dppDeltaBoundBox", width = NULL))
+            column(4, valueBoxOutput("dppMinimalDetectableDifferenceBox", width = NULL))
+          ),
+
+          # Metrics Explanation
+          fluidRow(
+            column(12,
+                   div(style = "background: #e8f4f8; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db; margin: 10px 0 30px 0;",
+                       h5(icon("info-circle"), " Understanding the Metrics", style = "color: #2c3e50; margin-bottom: 10px;"),
+                       p(strong("Statistical Power:"), " Probability of detecting a true treatment effect given the study design.",
+                         style = "color: #2c3e50; margin-bottom: 5px; font-size: 0.95em;"),
+                       p(strong("Tau Significance Threshold:"), " The calibrated probability threshold used to declare that the treatment is statistically significantly better than control.",
+                         style = "color: #2c3e50; margin-bottom: 5px; font-size: 0.95em;"),
+                       p(strong("Minimal Detectable Difference:"), " The smallest difference in response rates between treatment and control that the study can reliably detect as statistically significant.",
+                         style = "color: #2c3e50; margin-bottom: 5px; font-size: 0.95em;")
+                   )
+            )
           ),
 
           # PMD Statistics Section
@@ -754,12 +768,12 @@ shinyUI(
           )
         ),
 
-        # DPP Comparative Analysis Tab
+        # DPP Design Optimization Tab
         tabItem(
           tabName = "dpp_table",
 
           div(class = "content-header",
-              h1(icon("table"), " Comparative Analysis - Multiple Scenarios"),
+              h1(icon("table"), " Design Optimization - Multiple Scenarios"),
               p("Compare Type I error, Power, and PMD across different control response rates and historical borrowing amounts.",
                 style = "color: #666; font-size: 1.1em; margin-top: 10px;")
           ),
@@ -817,7 +831,7 @@ shinyUI(
           fluidRow(
             column(12,
                    div(style = "text-align: center; margin: 30px 0;",
-                       actionButton("run_dpp_table", "Run Comparative Analysis",
+                       actionButton("run_dpp_table", "Run Design Optimization Analysis",
                                     class = "btn-warning btn-lg",
                                     icon = icon("table"),
                                     style = "padding: 15px 50px; font-size: 1.3em;")
@@ -990,7 +1004,7 @@ shinyUI(
 
           fluidRow(
             column(12,
-                   div(style = "background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);",
+                   div(style = "background: white; padding: 25px; border-radius = 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);",
                        h4(icon("check-circle"), " Statistical Conclusion",
                           style = "color: #667eea; font-weight: 600; margin-bottom: 15px;"),
                        verbatimTextOutput("statistical_conclusion")
@@ -1024,7 +1038,7 @@ shinyUI(
                    )
             ),
             column(4,
-                   div(style = "background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);",
+                   div(style = "background: white; padding: 30px; border-radius: 8px; box-shadow = 0 4px 15px rgba(0,0,0,0.08);",
                        h4(icon("balance-scale"), " SAM Weight Parameters",
                           style = "color: #11998e; margin-bottom: 20px; font-size: 1.4em; font-weight: 600;"),
                        div(class = "term-link", actionLink("sam_weight_library_term_alpha_hist_w", HTML("<strong>alpha_hist</strong> - Historical prior alpha"))),
@@ -1105,7 +1119,7 @@ shinyUI(
                        numericInput("sam_delta", HTML("Clinically Meaningful Difference (&delta;)"), value = 0.15, min = 0, max = 1, step = 0.01)
                    ),
 
-                   div(style = "background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 20px;",
+                   div(style = "background: white; padding = 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 20px;",
                        h4(icon("random"), " Simulation Settings",
                           style = "color: #764ba2; margin-bottom: 20px; font-weight: 600; border-bottom: 2px solid #f8f9fc; padding-bottom: 10px;"),
                        fluidRow(
@@ -1252,7 +1266,7 @@ shinyUI(
             column(6,
                    div(style = "background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08);",
                        h4(icon("sliders-h"), " SAM Parameters",
-                          style = "color: #764ba2; margin-bottom: 20px; font-weight: 600; border-bottom: 2px solid #f8f9fc; padding-bottom: 10px;"),
+                          style = "color: #764ba2; margin-bottom: 20px; font-weight: 600; border-bottom = 2px solid #f8f9fc; padding-bottom = 10px;"),
                        numericInput("sam_table_delta", "Delta Threshold (CSD)", value = 0.1, min = 0, max = 1, step = 0.01),
                        helpText("Clinically Significant Difference threshold for SAM prior"),
                        numericInput("sam_table_typeIER", "Target Type I Error Rate", value = 0.1, min = 0.001, max = 0.5, step = 0.01),
@@ -1319,8 +1333,6 @@ shinyUI(
             )
           )
         ),
-
-
 
         # Fisher Library Tab
         tabItem(
@@ -1431,12 +1443,12 @@ shinyUI(
           )
         ),
 
-        # Fisher Bound Tab
+        # Fisher Rejection Boundary Tab
         tabItem(
           tabName = "fisher_bound",
 
           div(class = "content-header",
-              h1(icon("border-all"), " Fisher's Exact Test - Boundary Analysis"),
+              h1(icon("border-all"), " Fisher's Exact Test - Rejection Boundary"),
               p("Determine the minimum number of responders needed for statistical significance.",
                 style = "color: #666; font-size: 1.1em; margin-top: 10px;")
           ),
@@ -1453,7 +1465,7 @@ shinyUI(
             column(6,
                    div(style = "background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 20px;",
                        h4(icon("sliders-h"), " Analysis Parameters",
-                          style = "color: #764ba2; margin-bottom: 20px; font-weight: 600; border-bottom: 2px solid #f8f9fc; padding-bottom: 10px;"),
+                          style = "color: #764ba2; margin-bottom = 20px; font-weight: 600; border-bottom: 2px solid #f8f9fc; padding-bottom: 10px;"),
                        numericInput("fb_nt", "Experimental Arm Sample Size (nt)", value = 40, min = 1),
                        numericInput("fb_alpha", "Significance Threshold (α)", value = 0.1, min = 0.001, max = 0.5)
                    )
@@ -1463,7 +1475,7 @@ shinyUI(
           fluidRow(
             column(12,
                    div(style = "text-align: center; margin: 30px 0;",
-                       actionButton("run_fisher_bound", "Calculate Fisher Bound",
+                       actionButton("run_fisher_bound", "Calculate Fisher Boundary",
                                     class = "btn-primary btn-lg",
                                     icon = icon("border-all"),
                                     style = "padding: 15px 50px; font-size: 1.3em;")
@@ -1475,7 +1487,7 @@ shinyUI(
           fluidRow(
             column(12,
                    div(style = "background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); margin-bottom: 20px;",
-                       h4(icon("table"), " Fisher Bound Results",
+                       h4(icon("table"), " Fisher Boundary Results",
                           style = "color: #667eea; font-weight: 600; margin-bottom: 20px;"),
                        fluidRow(
                          column(6,
@@ -1508,7 +1520,7 @@ shinyUI(
                        fluidRow(
                          column(6,
                                 div(style = "background: #f8f9fc; padding: 15px; border-radius: 6px; border-left: 4px solid #667eea; margin-bottom: 15px;",
-                                    h5("Response Rate for Experimental Arm (rt)", style = "color: #667eea; margin-bottom: 10px;"),
+                                    h5("Responders for Experimental Arm (rt)", style = "color: #667eea; margin-bottom: 10px;"),
                                     verbatimTextOutput("fisherBoundRt")
                                 )
                          ),
@@ -1546,4 +1558,3 @@ shinyUI(
     )
   )
 )
-
