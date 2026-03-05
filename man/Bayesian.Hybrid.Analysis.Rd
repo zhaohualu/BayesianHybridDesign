@@ -22,56 +22,61 @@ Bayesian.Hybrid.Analysis(
 )
 }
 \arguments{
-\item{Yt}{Number of responses in experimental arm in current study}
+\item{Yt}{Number of responses in the experimental arm in the current study.}
 
-\item{nt}{number of patients in experimental arm in current study}
+\item{nt}{Number of patients in the experimental arm in the current study.}
 
-\item{Yc}{Number of responses in control arm in current study}
+\item{Yc}{Number of responses in the control arm in the current study.}
 
-\item{nc}{number of patients in control arm in current study}
+\item{nc}{Number of patients in the control arm in the current study.}
 
-\item{Ych}{Number of responses in control treatment in historical study}
+\item{Ych}{Number of responses in the control treatment in the historical study.}
 
-\item{nche}{Equivalent number of patients borrowed from historical study}
+\item{nche}{Equivalent number of patients borrowed from the historical study.}
 
-\item{nch}{Total number of patients in historical control}
+\item{nch}{Total number of patients in the historical control.}
 
-\item{sig}{significance boundary defined as P(pt_hat > pc_hat|hybrid) > sig}
+\item{sig}{Significance boundary. The hypothesis is considered significant if
+the posterior probability \eqn{P(p_t > p_c | data) > sig}.}
 
-\item{a0c}{hyperprior for control response rate beta(a0c, b0c)}
+\item{credlev}{Credible interval level (e.g., 0.95 for 95 percent CI).}
 
-\item{b0c}{hyperprior for control response rate beta(a0c, b0c)}
+\item{a0c}{Prior alpha parameter for control response rate, \eqn{Beta(a_{0c}, b_{0c})}.}
 
-\item{a0t}{hyperprior for experimental response rate beta(a0t, b0t)}
+\item{b0c}{Prior beta parameter for control response rate, \eqn{Beta(a_{0c}, b_{0c})}.}
 
-\item{b0t}{hyperprior for experimental response rate beta(a0t, b0t)}
+\item{a0t}{Prior alpha parameter for experimental response rate, \eqn{Beta(a_{0t}, b_{0t})}.}
 
-\item{delta_threshold}{Borrow when abs(pc_hat (current study) - pch) <= delta_threshold}
+\item{b0t}{Prior beta parameter for experimental response rate, \eqn{Beta(a_{0t}, b_{0t})}.}
 
-\item{credlev:}{Credible interval level}
+\item{delta_threshold}{Borrowing threshold. Borrowing occurs when
+\eqn{|p_{c,trial} - p_{c,hist}| \le} \code{delta_threshold}.}
 }
 \value{
-An object with values
+A list containing the following components:
 \itemize{
-\item prob.pt.gt.pc Probability of experimental arm having a better posterior response rate than control
-\item median_hca Posterior median response rate for hybrid control
-\item CI_hca Credible interval for median response rate for hybrid control
-\item median_c Posterior median response rate for current study control
-\item CI_c Credible interval for median response rate for current study control
-\item median_t Posterior median response rate for current study experimental arm
-\item CI_t Credible interval for median response rate for current experimental arm
-\item delta.m Posterior median response rate difference for experimental arm vs control arm based on hybrid design
-\item delta.CI Credible interval for posterior median response rate difference for experimental arm vs control arm  based on hybrid design
-\item delta.m_trial Posterior median response rate difference for experimental arm vs control arm based on current study only
-\item delta.CI_trial  Credible interval for posterior median response rate difference for experimental arm vs control arm based on current study only
-\item conclusion Statistical inference conclusion for comparing the response rate of experimental arm vs control arm
+\item \code{prob.pt.gt.pc}: Probability of experimental arm having a better posterior response rate than control.
+\item \code{median_hca}: Posterior median response rate for hybrid control.
+\item \code{CI_hca}: Credible interval for median response rate for hybrid control.
+\item \code{median_c}: Posterior median response rate for current study control.
+\item \code{CI_c}: Credible interval for median response rate for current study control.
+\item \code{median_t}: Posterior median response rate for current study experimental arm.
+\item \code{CI_t}: Credible interval for median response rate for current experimental arm.
+\item \code{delta.m}: Posterior median response rate difference (experimental - control) based on hybrid design.
+\item \code{delta.CI}: Credible interval for response rate difference based on hybrid design.
+\item \code{delta.m_trial}: Posterior median response rate difference (experimental - control) based on current study only.
+\item \code{delta.CI_trial}: Credible interval for response rate difference based on current study only.
+\item \code{conclusion}: Statistical inference conclusion string.
 }
 }
 \description{
-This function performs the statistical analysis for a Bayesian Hybrid Design using dynamic power prior approach.
+This function performs the statistical analysis for a Bayesian Hybrid Design
+using a dynamic power prior approach.
 }
 \examples{
-
-Bayesian.Hybrid.Analysis(Yt=18, nt=40,Yc=13,nc=40,Ych=73,nche=40,nch=234)
-
+\dontrun{
+# Note: This example relies on the internal package function 'borrow.wt'
+Bayesian.Hybrid.Analysis(Yt=18, nt=40, Yc=13, nc=40, Ych=73,
+                         nche=40, nch=234)
+}
 }

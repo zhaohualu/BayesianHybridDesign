@@ -12,17 +12,17 @@ runCalibratedSAM(
   nc.calib,
   nt.calib,
   pc.calib,
-  xt.cal,
-  xc.cal,
+  xt.cal = NULL,
+  xc.cal = NULL,
   typeIER.cal = 0.1,
   nche,
   nc,
   nt,
   pc,
   pt,
-  xt,
-  xc,
-  nf.prior = mixbeta(c(1, 0.001, 0.001)),
+  xt = NULL,
+  xc = NULL,
+  nf.prior = RBesT::mixbeta(c(1, 0.001, 0.001)),
   seed.hist = 1000,
   seed.gMAP = 2000,
   seed.SAM = 3000,
@@ -34,10 +34,10 @@ runCalibratedSAM(
 calibration and main simulation steps.}
 
 \item{pch}{Historical control response rate (used to generate \code{HistData}
-for the \code{gMAP} prior).}
+for the \code{\link[RBesT:gMAP]{RBesT::gMAP()}} prior).}
 
 \item{delta_threshold}{The CSD (Clinically Significant Difference) threshold
-used for the SAM prior in \code{runSAM}.}
+used for the SAM prior in \code{\link[=runSAM]{runSAM()}}.}
 
 \item{nche.c}{Sample size for the historical control data (\code{HistData}).}
 
@@ -74,14 +74,14 @@ Set \code{pt = pc} for Type I Error, or \code{pt > pc} for Power).}
 \strong{main simulation}. If \code{NULL}, data is simulated internally.}
 
 \item{xc}{(Optional) A vector of pre-simulated control outcomes for the
-\strong{main simulation}. If \code{NULL}, data is simulated internally.}
+\strong{main simulation}. Examples use \code{\link[RBesT:mixbeta]{RBesT::mixbeta()}}. If \code{NULL}, data is simulated internally.}
 
 \item{nf.prior}{The non-informative prior to use. Defaults to
-\code{mixbeta(c(1, 0.001, 0.001))}.}
+\code{RBesT::mixbeta(c(1, 0.001, 0.001))}.}
 
 \item{seed.hist}{Seed for generating historical data.}
 
-\item{seed.gMAP}{Seed for the \code{gMAP} function.}
+\item{seed.gMAP}{Seed for the \code{\link[RBesT:gMAP]{RBesT::gMAP()}} function.}
 
 \item{seed.SAM}{Seed for the main \code{runSAM} simulation call.}
 
@@ -115,9 +115,9 @@ final operating characteristics (e.g., Type I Error or Power) and bias.
 }
 }
 \details{
-This function wraps the core \code{runSAM} function by adding a calibration layer.
-It derives historical data priors using \code{gMAP} and \code{automixfit} based on
-\code{nche.c} and \code{pch}.
+This function wraps the core \code{\link[=runSAM]{runSAM()}} function by adding a calibration layer.
+It derives historical data priors using \code{\link[RBesT:gMAP]{RBesT::gMAP()}} and \code{\link[RBesT:automixfit]{RBesT::automixfit()}}
+based on \code{nche.c} and \code{pch}.
 
 The calibration step (\code{runSAM} with \code{...calib} parameters) finds the
 \code{(1 - typeIER.cal)} quantiles for the posterior distributions (SAM, rMAP, Non-info)
@@ -129,69 +129,31 @@ calibrated thresholds. This proportion represents the final Type I Error or Powe
 }
 \examples{
 \dontrun{
-# This example assumes the functions 'runSAM', 'gMAP', 'automixfit',
-# 'mixbeta', and 'decision2S' are loaded.
-
-# --- Example 1: Calculate Power (Based on pc = 0.3 scenario) ---
-# This uses the scenario where:
-#   Main sim: pc = 0.30, pt = 0.50 (pc + 0.2)
-#   Calibration: pc.calib = 0.3
-#   Sample sizes: nc=45, nt=45, nche=180
+# Example uses functions from the RBesT package
+library(RBesT)
 
 sim_power_pc30 <- runCalibratedSAM(
-  nsim = 100,
-  pch = 0.30,
-  delta_threshold = 0.1,
-  nche.c = 180,      # Historical sample size
-  nc.calib = 45,     # Calibration control sample size
-  nt.calib = 45,     # Calibration treatment sample size
-  pc.calib = 0.3,    # Calibration control rate (null)
-  xt.cal = NULL,
-  xc.cal = NULL,
-  typeIER.cal = 0.10,  # Assuming a 10\% target T1E
-  nche = 180,        # Historical sample size (matches nche.c)
-  nc = 45,           # Main sim control sample size
-  nt = 45,           # Main sim treatment sample size
-  pc = 0.30,         # The selected scenario
-  pt = 0.50,         # pc + 0.2 for Power
-  xt = NULL,
-  xc = NULL
-  # Seeds will use function defaults
+   nsim = 100,
+   pch = 0.30,
+   delta_threshold = 0.1,
+   nche.c = 180,
+   nc.calib = 45,
+   nt.calib = 45,
+   pc.calib = 0.3,
+   typeIER.cal = 0.10,
+   nche = 180,
+   nc = 45,
+   nt = 45,
+   pc = 0.30,
+   pt = 0.50
 )
 
-# View the resulting Power for SAM, MAP, and Non-info
 print(sim_power_pc30$Sim_Result)
-
-
-# --- Example 2: Calculate Type I Error (Based on pc = 0.3 scenario) ---
-# This uses the same parameters, but sets pt = pc for the main simulation.
-
-sim_type1_pc30 <- runCalibratedSAM(
-  nsim = 1000,
-  pch = 0.30,
-  delta_threshold = 0.1,
-  nche.c = 180,
-  nc.calib = 45,
-  nt.calib = 45,
-  pc.calib = 0.3,
-  xt.cal = NULL,
-  xc.cal = NULL,
-  typeIER.cal = 0.10,
-  nche = 180,
-  nc = 45,
-  nt = 45,
-  pc = 0.30,
-  pt = 0.30,         # pt = pc for Type I Error
-  xt = NULL,
-  xc = NULL
-)
-
-# View the resulting Type I Error for SAM, MAP, and Non-info
-# These should be close to the 'typeIER.cal' of 0.10
-print(sim_type1_pc30$Sim_Result)
 }
 
 }
 \seealso{
-\code{\link{runSAM}}, \code{\link{gMAP}}, \code{\link{automixfit}}
+\code{\link{runSAM}}, \code{\link[RBesT]{gMAP}},
+\code{\link[RBesT]{automixfit}}, \code{\link[RBesT]{mixbeta}},
+\code{\link[RBesT]{decision2S}}
 }

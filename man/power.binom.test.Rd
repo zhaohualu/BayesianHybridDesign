@@ -2,41 +2,45 @@
 % Please edit documentation in R/power.binom.test.R
 \name{power.binom.test}
 \alias{power.binom.test}
-\title{Power calculation using exact binomial test for one sample problem}
+\title{Power Calculation for the Exact Binomial Test}
 \usage{
 power.binom.test(
   n = 20,
   p = 0.5,
   p0 = 0.3,
   alpha = 0.05,
-  alternative = c("two.sided", "less", "greater"),
+  alternative = c("two.sided", "greater", "less"),
   nsim = 1e+05,
   seed = 2025
 )
 }
 \arguments{
-\item{n}{Sample size}
+\item{n}{Sample size of the experimental group.}
 
-\item{p}{Assumed proportion of experimental treatment}
+\item{p}{Assumed true proportion (response rate) of the experimental treatment.}
 
-\item{p0}{Historical proportion as a benchmark}
+\item{p0}{Historical proportion (null hypothesis) used as a benchmark.}
 
-\item{alpha}{Type I error}
+\item{alpha}{Type I error rate (significance level).}
 
-\item{alternative}{Alternative hypothesis: "two.sided", "less", "greater".}
+\item{alternative}{Character string specifying the alternative hypothesis,
+must be one of "two.sided" (default), "greater" or "less".}
 
-\item{nsim}{Number of simulated trials, default 100,000}
+\item{nsim}{Number of simulated trials; defaults to 100,000 for high precision.}
 
-\item{seed}{Seed for simulation}
+\item{seed}{Seed for reproducibility.}
 }
 \value{
-Power
+A numeric value representing the statistical power.
 }
 \description{
-This function performs Fishers exact test customized for comparing response rate for two arms.
+Calculates the power of a one-sample exact binomial test via simulation.
+This is used to compare a treatment response rate against a fixed
+historical benchmark.
 }
 \examples{
-
-power.binom.test (n=110, p=0.4, p0=0.128)
+\donttest{
+power.binom.test(n=110, p=0.4, p0=0.128)
+}
 
 }

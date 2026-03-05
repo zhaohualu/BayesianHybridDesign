@@ -6,8 +6,6 @@ Authors@R:
       person("Philip", "He", email = "philipyihe2018@gmail.com", role = c("aut")),
       person("Zhaohua", "Lu", email = "zhaohua.lu@gmail.com", role = c("aut", "cre"))
     )
-Author: Philip He [aut], Zhaohua Lu [aut, cre]
-Maintainer: Zhaohua Lu <zhaohua.lu@gmail.com>
 Description: Implements Bayesian hybrid designs that incorporate historical
     control data into a current clinical trial. The package uses a dynamic
     power prior method to determine the degree of borrowing from the historical
@@ -16,9 +14,9 @@ Description: Implements Bayesian hybrid designs that incorporate historical
     response rate (ORR). Functions are provided for design calibration,
     sample size calculation, power evaluation, and final analysis. 
     Additionally, it includes functions adapted from the 'SAMprior' package 
-    (v1.1.1) by Yang and others (2023) <doi:10.1111/biom.13927> to support the 
+    (v1.1.1) by Yang and others (2023)  to support the 
     Self-Adapting Mixture (SAM) prior framework for comparison.
-License: GPL-3
+License: GPL-3 + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
